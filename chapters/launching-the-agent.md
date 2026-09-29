@@ -33,10 +33,17 @@ Kimi Delta Attention forward on a B200 with `B=1`,
 agent, and the other is a GPU server running KCoral to execute kernels and
 collect measurements. The agent and KCoral can also run on the same machine.
 
-### Install the harness
+### Prepare the harness checkout
 
-The environment running the agent needs Python, Rust, and `uv`. The GPU server
-needs CUDA and, for NCU profiling, Nsight Compute.
+This example follows the harness's
+{harness}`registered-workload setup <docs/optimization-runs.md>`, which builds
+the harness in each run's environment. Use Linux x86_64 with Python 3.12 or
+3.13 and pip 25.1 or later. The agent machine also needs `uv`, Rust 1.89.0 or
+later with Cargo, and the C/C++ build tools and Python development headers
+listed in the {harness}`source-build prerequisites <docs/installation.md#build-from-source>`.
+Install the CUDA Toolkit wherever kernels are compiled, and a compatible
+NVIDIA driver on the GPU server. NCU captures need Nsight Compute on the
+server; reading the returned reports also needs `ncu` on the agent machine.
 
 Clone the harness where the agent runs and on the GPU server. If they share
 one machine, a single checkout is enough:
@@ -47,11 +54,11 @@ cd TIRx-harness
 git submodule update --init thirdparty/tvm-rust-ext
 ```
 
-On the agent machine, install the harness in your existing Python environment
-from the repository root:
+On the agent machine, install the setup dependencies in the Python environment
+you will use to launch setup, from the repository root:
 
 ```bash
-python -m pip install .
+python -m pip install -r evolution/preparation/requirements.txt
 ```
 
 ### Start KCoral on the GPU server
@@ -65,8 +72,8 @@ network; never expose the server to the public internet.
 ```
 
 ```bash
-python -m pip install --group benchmark 'kcoral[server]'
-python -m kcoral --gpus 0 --host 0.0.0.0 --port 8000
+python -m pip install --group server
+python -m kcoral server --gpus 0 --host 0.0.0.0 --port 8000
 ```
 
 Leave this process running. If both roles use the same machine, open another
@@ -91,9 +98,11 @@ python evolution/setup.py --task kda_forward_b1_t8192_h96 \
   --remote "$KCORAL_URL"
 ```
 
-Setup creates a worktree with the required environment, skills, and task
-prompt. The run directory contains `PROMPT.md`, `manifest.json`, and
-`worktree/`; candidate kernels will live under
+Setup creates a worktree and `.venv` using the Python interpreter that launched
+it, then installs the harness and benchmark dependencies from `uv.lock` and
+prepares the skills, references, and task prompt. This also applies when the
+GPU is remote. The run directory contains `PROMPT.md`, `manifest.json`,
+`flowverse.yaml`, and `worktree/`; candidate kernels will live under
 `candidates/kda/forward_b1_t8192_h96/` in that worktree.
 
 Set `run_dir` to the absolute path printed by setup, enter the worktree, and
@@ -166,7 +175,8 @@ The 3× speedup target is an example; choose a target that fits your task.
 :::{container} launch-panel
 :name: flame-chase
 
-The harness environment includes Humanize. Run
+Install Humanize separately using its
+[installation instructions](https://github.com/humanfia/humanize#install), then run
 [Flame Chase](https://docs.humanfia.ai/humanize/flows/flame-chase)
 in the prepared terminal:
 

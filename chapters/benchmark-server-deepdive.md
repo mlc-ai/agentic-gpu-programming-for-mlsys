@@ -165,16 +165,25 @@ efficiently, changes the kernel, and benchmarks the result. A second profile
 helps it check whether the change had the intended effect.
 
 The kernel is a single fused kernel with one CTA per head, in which eight
-preprocessing warps prepare each chunk for the MMA and state warps. `$WORKLOAD` stands for the
-task's workload directory. Output excerpts keep only the key lines; `...`
-marks omitted text.
+preprocessing warps prepare each chunk for the MMA and state warps. The commands
+below use paths relative to the generated worktree root. Set the workload path
+there before running them:
+
+```bash
+WORKLOAD=candidates/kda/forward_b1_t8192_h96
+```
+
+Capture and analysis scripts such as `capture_iket.py` and `iket_analyze.py`
+were written by the agent during this run. Output excerpts keep only the key
+lines; `...` marks omitted text.
 
 At one point, the best kernel runs at 0.497283 ms, 2.1162× over the baseline.
 The agent captures an IKET timeline of it through KCoral and summarizes the time each
 preprocessing warp spends in each stage:
 
 ```bash
-python kcoral_iket.py --remote http://10.0.2.2:8901 --send scratch/product-gamma \
+python evolution/remote/kcoral_iket.py --remote http://10.0.2.2:8901 \
+    --send "$WORKLOAD/scratch/product-gamma" \
     --output-dir iket_out -- profile --postprocess json -- python capture_iket.py
 python iket_analyze.py iket_out/iket_pid_0x8e.trace.json 13
 ```
@@ -238,7 +247,8 @@ moves the diagonal inversions into the Gram tail:
 The CPU checks pass, and the official benchmark measures a new best:
 
 ```bash
-python kcoral_remote.py $WORKLOAD scratch/overlap-diag-inverse-gram-tail --remote http://10.0.2.2:8901 --timeout 600
+python evolution/remote/kcoral_remote.py "$WORKLOAD" scratch/overlap-diag-inverse-gram-tail \
+    --remote http://10.0.2.2:8901 --timeout 600
 ```
 
 ```text
@@ -261,7 +271,8 @@ the agent profiles one launch of it with NCU through KCoral and reads the
 report's source counters locally:
 
 ```bash
-python kcoral_ncu.py --remote http://10.0.2.2:8901 --send scratch/profile-qacc-ring \
+python evolution/remote/kcoral_ncu.py --remote http://10.0.2.2:8901 \
+    --send "$WORKLOAD/scratch/profile-qacc-ring" \
     -o kda-full.ncu-rep --set full --launch-count 1 --kernel-name kda_fwd_kernel -- python capture_ncu.py
 ncu --import kda-full.ncu-rep --page details --section SourceCounters
 ```
@@ -326,7 +337,8 @@ picks out its own head in shared memory:
 The CPU checks pass, and the official benchmark measures a new best:
 
 ```bash
-python kcoral_remote.py $WORKLOAD scratch/beta-tma --remote http://10.0.2.2:8901 --timeout 600
+python evolution/remote/kcoral_remote.py "$WORKLOAD" scratch/beta-tma \
+    --remote http://10.0.2.2:8901 --timeout 600
 ```
 
 ```text
