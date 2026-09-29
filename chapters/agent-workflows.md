@@ -75,6 +75,6 @@ Changing how agents divide the work can leave their tool calls unchanged.
 Conversely, if the profiling tool returns a more informative report through
 the same interface, agents in each workflow can use that additional feedback.
 
-[Running Agent Workflows](running-agent-workflows.md) puts this composition into practice
+[Launching the Agent](launching-the-agent.md) puts this composition into practice
 with TIRx Harness and shows how to use goal mode or Flame Chase
 for a kernel optimization task.
