@@ -82,7 +82,7 @@ python -m pip install -r evolution/preparation/requirements.txt
 ### Start KCoral on the GPU server
 
 In the GPU server's terminal, from the harness checkout, install the benchmark
-and server dependencies, including DeepGEMM, and start KCoral on GPU 0:
+and server dependencies and start KCoral on GPU 0:
 
 ```{warning}
 KCoral executes arbitrary code. Allow only trusted clients on an isolated
@@ -158,10 +158,6 @@ against DeepGEMM on the same quantized inputs, with preparation and compilation
 outside timing. Each workload reports `DeepGEMM time / candidate time`;
 the summary includes the geometric mean across all four workloads.
 
-To evaluate a candidate, replace `baseline` with its directory relative to
-the workload, such as `scratch/first`. That directory contains `solution.py`,
-which exports `setup(data, G, M, N, K) -> callable` as specified in `PROMPT.md`.
-
 ## Kick Off Agentic Runs
 
 An optimization run lasts many turns, so the agent needs a launcher that keeps
@@ -185,11 +181,11 @@ session, enter the following prompt:
 
 ```text
 /goal Read ../PROMPT.md in full and carry out the optimization task.
-Optimize against the prescribed DeepGEMM performance baseline and retain
-reproducibly passing candidates with their measurements in the frontier.
+Reach at least 3.0x speedup over the prescribed performance baseline
+with a reproducibly passing kernel and retain it in the frontier.
 ```
 
-Set a time budget or performance target appropriate to this workload.
+The 3× speedup target is an example; choose a target that fits your task.
 
 :::
 
