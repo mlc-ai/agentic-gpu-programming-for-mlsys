@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vector clocks for the TMEM example kernel</title>
+<link rel="stylesheet" href="diagrams.css"><script src="diagrams.js" defer></script>
+<style>
+  .two-col { grid-template-columns: 1.05fr 1fr; }
+  .code-line { font-size: 11px; }
+  .clock-key { padding: 8px 10px; margin-bottom: 12px; background: var(--soft); border: 1px solid var(--border); border-radius: 5px; font-size: 12px; }
+  .access-range { padding: 7px; margin: 7px 0 12px; border: 1px solid var(--red); border-radius: 5px; background: var(--red-bg); text-align: center; font-size: 12px; }
+  .clock-flow { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; }
+  .clock-bar { grid-column: 1 / -1; border: 1px solid var(--border); border-radius: 5px; padding: 7px; background: var(--soft); text-align: center; font-size: 12px; }
+  .clock-bar strong { display: block; margin-bottom: 3px; }
+  .clock-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .warp { min-width: 0; text-align: center; }
+  .warp .label { margin-bottom: 8px; }
+  .event { padding: 7px 3px; min-height: 66px; display: flex; flex-direction: column; justify-content: center; border: 1px solid var(--border); border-radius: 5px; background: var(--blue-bg); font-size: 12px; }
+  .event code, .clock-pair code { font-size: 14px; font-weight: 650; }
+  .event small { color: var(--muted); font-size: 10px; }
+  .advance { height: 24px; color: var(--muted); font-size: 18px; }
+  [data-node].active { outline: 2px solid var(--blue); outline-offset: 2px; }
+  [data-state="compare"] [data-node].active { outline-color: var(--red); }
+  .detail { min-height: 177px; }
+  .calculation { display: block; margin: 7px 0; padding: 6px 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; font-size: 12px; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 12px; text-align: center; }
+  th, td { border: 1px solid var(--border); padding: 6px 4px; }
+  th { background: var(--surface); font-weight: 600; }
+  td { font-family: var(--font-mono); }
+  td[data-passes="true"] { background: var(--green-bg); }
+  td[data-passes="false"] { background: var(--red-bg); color: var(--red); font-weight: 650; }
+  .verdict { color: var(--red); font-weight: 650; }
+  @media (max-width: 580px) { .two-col { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main data-selection data-state="record">
+  <div class="controls" aria-label="Vector clock analysis of the TMEM example kernel">
+    <button data-select="record" data-state="record" data-highlights="code-write code-read write read range" aria-pressed="true" aria-controls="record">1. Record clocks</button>
+    <button data-select="merge" data-state="merge" data-highlights="code-store-wait code-load-wait store-wait load-wait cleanup" aria-pressed="false" aria-controls="merge">2. Follow synchronization</button>
+    <button data-select="compare" data-state="compare" data-highlights="code-write code-read write read range" aria-pressed="false" aria-controls="compare">3. Compare accesses</button>
+  </div>
+  <p class="clock-key">Each warp has a clock <code>[W3,W7]</code>. Its own entry counts its modeled events; the other entry records the latest event ordered before it from the other warp. Both start at <code data-clock="start"></code> after common setup.</p>
+  <div class="two-col">
+    <section>
+      <p class="label">Pseudocode · one CTA</p>
+      <div class="code">
+        <span class="code-line"><span class="line-number">1</span>group = warp // 4</span>
+        <span class="code-line"><span class="line-number">2</span>row = (warp % 4) * 32 + lane</span>
+        <span class="code-line"><span class="line-number">3</span>if group == 0:</span>
+        <span class="code-line" data-node="code-write"><span class="line-number">4</span>  tmem_store(tile, row, values)</span>
+        <span class="code-line" data-node="code-store-wait"><span class="line-number">5</span>  wait_own_stores()</span>
+        <span class="code-line"><span class="line-number">6</span>if group == 1:</span>
+        <span class="code-line" data-node="code-read"><span class="line-number">7</span>  values = tmem_load(tile, row)</span>
+        <span class="code-line" data-node="code-load-wait"><span class="line-number">8</span>  wait_own_loads()</span>
+        <span class="code-line"><span class="line-number">9</span>  output[row, :] = values</span>
+      </div>
+      <p class="legend">Each warpgroup has four warps. Setup synchronization precedes the TMEM accesses; cleanup synchronization follows them.</p>
+      <div class="access-range" data-node="range">Both warps access <code>tile</code><br><code>rows <span data-rows></span>, columns 0..31</code></div>
+    </section>
+    <section>
+      <p class="label">Clocks at the conflicting warp instructions</p>
+      <div class="clock-flow" role="group" aria-label="Warp 3 stores to TMEM and warp 7 loads the same rows. Each waits for its own operations, then both join cleanup synchronization.">
+        <div class="warp">
+          <p class="label">Warp 3 · group 0</p>
+          <div class="event" data-node="write"><span>Store · line 4</span><code data-clock="write"></code></div>
+          <div class="advance" aria-hidden="true">↓</div>
+          <div class="event" data-node="store-wait"><span>Wait for own stores</span><small>line 5</small><code data-clock="storeWait"></code></div>
+          <div class="advance" aria-hidden="true">↓</div>
+        </div>
+        <div class="warp">
+          <p class="label">Warp 7 · group 1</p>
+          <div class="event" data-node="read"><span>Load · line 7</span><code data-clock="read"></code></div>
+          <div class="advance" aria-hidden="true">↓</div>
+          <div class="event" data-node="load-wait"><span>Wait for own loads</span><small>line 8</small><code data-clock="loadWait"></code></div>
+          <div class="advance" aria-hidden="true">↓</div>
+        </div>
+        <div class="clock-bar" data-node="cleanup"><strong>After cleanup synchronization</strong><div class="clock-pair"><code data-clock="cleanup3"></code><code data-clock="cleanup7"></code></div></div>
+      </div>
+    </section>
+  </div>
+  <div class="detail" aria-live="polite">
+    <section id="record" data-panel="record">
+      <h2>Read each clock as an ordering history</h2>
+      <p>The store's clock <code data-clock="write"></code> records W3's first event, with no preceding W7 event. The load's clock <code data-clock="read"></code> records W7's first event, with no preceding W3 event.</p>
+      <p>The zero in the load's W3 entry means the store is missing from the load's ordering history. Even if W3 runs first on the GPU, no synchronization orders its store before W7's load.</p>
+    </section>
+    <section id="merge" data-panel="merge" hidden>
+      <h2>The clocks merge at cleanup, after both accesses</h2>
+      <p>The local waits advance only their own warp's entry. Cleanup then merges both histories: taking the maximum keeps the latest event from each warp. Each warp also increments its own entry for cleanup.</p>
+      <div class="calculation"><code>max(<span data-clock="storeWait"></span>, <span data-clock="loadWait"></span>) = <span data-clock="merged"></span></code><br><code>W3 → <span data-clock="cleanup3"></span>; W7 → <span data-clock="cleanup7"></span></code></div>
+      <p>The recorded store and load clocks remain <code data-clock="write"></code> and <code data-clock="read"></code>. This later synchronization does not order those earlier accesses.</p>
+    </section>
+    <section id="compare" data-panel="compare" hidden>
+      <h2>Compare the clocks recorded at lines 4 and 7</h2>
+      <p>Store S = <code data-clock="write"></code>; load L = <code data-clock="read"></code>. S ≤ L would mean that the load's history includes the store. It requires every entry of S to be no larger than the corresponding entry of L.</p>
+      <table aria-label="Componentwise comparison of the TMEM store and load clocks">
+        <thead><tr><th>Comparison</th><th>W3</th><th>W7</th></tr></thead>
+        <tbody>
+          <tr data-comparison="write read"><th>S ≤ L?</th><td></td><td></td></tr>
+          <tr data-comparison="read write"><th>L ≤ S?</th><td></td><td></td></tr>
+        </tbody>
+      </table>
+      <p class="verdict">Neither access happens before the other. They conflict on the same TMEM locations: a data race.</p>
+    </section>
+  </div>
+</main>
+<script>
+(() => {
+  const merge = (a, b) => a.map((value, i) => Math.max(value, b[i]));
+  const tick = (clock, actor) => clock.map((value, i) => value + Number(i === actor));
+  const clocks = { start: [0, 0] };
+  clocks.write = tick(clocks.start, 0);
+  clocks.read = tick(clocks.start, 1);
+  clocks.storeWait = tick(clocks.write, 0);
+  clocks.loadWait = tick(clocks.read, 1);
+  clocks.merged = merge(clocks.storeWait, clocks.loadWait);
+  clocks.cleanup3 = tick(clocks.merged, 0);
+  clocks.cleanup7 = tick(clocks.merged, 1);
+  document.querySelectorAll('[data-clock]').forEach(element => {
+    element.textContent = `[${clocks[element.dataset.clock].join(',')}]`;
+  });
+  const firstRow = (3 % 4) * 32;
+  document.querySelectorAll('[data-rows]').forEach(element => {
+    element.textContent = `${firstRow}..${firstRow + 31}`;
+  });
+  document.querySelectorAll('[data-comparison]').forEach(row => {
+    const [left, right] = row.dataset.comparison.split(' ').map(key => clocks[key]);
+    row.querySelectorAll('td').forEach((cell, i) => {
+      const passes = left[i] <= right[i];
+      cell.textContent = `${left[i]} ${passes ? '≤' : '>'} ${right[i]}`;
+      cell.dataset.passes = String(passes);
+    });
+  });
+})();
+</script>
+</body>
+</html>

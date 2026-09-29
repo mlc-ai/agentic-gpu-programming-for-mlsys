@@ -1,0 +1,54 @@
+### Racecheck (CPU)
+# racecheck
+=== racecheck ERROR ===
+=== Verdict findings (1025) ===
+  [ERROR] data_race: unordered read/write on allocation#0:[196608, 196736) between kernel:0/warp:7/seq:6/source:op:541/loops:[]/lane:0 read tmem allocation#0:[196608, 196736) and kernel:0/warp:3/seq:70/source:op:457/loops:[]/lane:0 write tmem allocation#0:[196608, 196736); execution ordering failure: no synchronization edge orders the actors
+    Access pair: read_write
+    Prior: warp 7, source op #541
+      at tmem_race.py:52:1
+        52 |             txl.ptx[TMEM_LD](*(regs[i] for i in range(COLS)), addr)
+           | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    Current: warp 3, source op #457
+      at tmem_race.py:47:1
+        47 |             txl.ptx[TMEM_ST](addr, *(regs[i] for i in range(COLS)))
+           | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+race conflicts checked in global, shared, tmem
+native phase tmem_handoff: 340 semantic memory access(es)
+  (plus 1024 REVIEW uninitialized_read findings: the consumer's registers read TMEM before it was written, a consequence of the same race)
+# racecheck --fixed
+=== racecheck CLEAN ===
+race conflicts checked in global, shared, tmem
+native phase tmem_handoff: 546 semantic memory access(es)
+### GPU
+# gpu          run 1: racy output matches expected: True | wrong elements: 0
+# gpu          run 2: racy output matches expected: True | wrong elements: 0
+# gpu          run 3: racy output matches expected: True | wrong elements: 0
+# gpu --fixed  run 1: fixed output matches expected: True | wrong elements: 0
+# gpu --fixed  run 2: fixed output matches expected: True | wrong elements: 0
+# gpu --fixed  run 3: fixed output matches expected: True | wrong elements: 0
+### compute-sanitizer Version 2026.1.0.0 (build 37182542) (public-release)
+# racecheck  run 1: racy output matches expected: False | wrong elements: 3072 ========= RACECHECK SUMMARY: 0 hazards displayed (0 errors, 0 warnings) 
+# racecheck  run 2: racy output matches expected: False | wrong elements: 3072 ========= RACECHECK SUMMARY: 0 hazards displayed (0 errors, 0 warnings) 
+# racecheck  run 3: racy output matches expected: False | wrong elements: 3072 ========= RACECHECK SUMMARY: 0 hazards displayed (0 errors, 0 warnings) 
+# racecheck --fixed run 1: fixed output matches expected: True | wrong elements: 0 ========= RACECHECK SUMMARY: 0 hazards displayed (0 errors, 0 warnings) 
+# racecheck --fixed run 2: fixed output matches expected: True | wrong elements: 0 ========= RACECHECK SUMMARY: 0 hazards displayed (0 errors, 0 warnings) 
+# racecheck --fixed run 3: fixed output matches expected: True | wrong elements: 0 ========= RACECHECK SUMMARY: 0 hazards displayed (0 errors, 0 warnings) 
+# synccheck  run 1: racy output matches expected: False | wrong elements: 3072 ========= ERROR SUMMARY: 0 errors 
+# synccheck  run 2: racy output matches expected: False | wrong elements: 3072 ========= ERROR SUMMARY: 0 errors 
+# synccheck  run 3: racy output matches expected: False | wrong elements: 3072 ========= ERROR SUMMARY: 0 errors 
+# synccheck --fixed run 1: fixed output matches expected: True | wrong elements: 0 ========= ERROR SUMMARY: 0 errors 
+# synccheck --fixed run 2: fixed output matches expected: True | wrong elements: 0 ========= ERROR SUMMARY: 0 errors 
+# synccheck --fixed run 3: fixed output matches expected: True | wrong elements: 0 ========= ERROR SUMMARY: 0 errors 
+# memcheck  run 1: racy output matches expected: False | wrong elements: 4096 ========= ERROR SUMMARY: 0 errors 
+# memcheck  run 2: racy output matches expected: False | wrong elements: 4096 ========= ERROR SUMMARY: 0 errors 
+# memcheck  run 3: racy output matches expected: False | wrong elements: 4096 ========= ERROR SUMMARY: 0 errors 
+# memcheck --fixed run 1: fixed output matches expected: True | wrong elements: 0 ========= ERROR SUMMARY: 0 errors 
+# memcheck --fixed run 2: fixed output matches expected: True | wrong elements: 0 ========= ERROR SUMMARY: 0 errors 
+# memcheck --fixed run 3: fixed output matches expected: True | wrong elements: 0 ========= ERROR SUMMARY: 0 errors 
+# initcheck  run 1: racy output matches expected: True | wrong elements: 0 ========= ERROR SUMMARY: 0 errors 
+# initcheck  run 2: racy output matches expected: True | wrong elements: 0 ========= ERROR SUMMARY: 0 errors 
+# initcheck  run 3: racy output matches expected: True | wrong elements: 0 ========= ERROR SUMMARY: 0 errors 
+# initcheck --fixed run 1: fixed output matches expected: True | wrong elements: 0 ========= ERROR SUMMARY: 0 errors 
+# initcheck --fixed run 2: fixed output matches expected: True | wrong elements: 0 ========= ERROR SUMMARY: 0 errors 
+# initcheck --fixed run 3: fixed output matches expected: True | wrong elements: 0 ========= ERROR SUMMARY: 0 errors 

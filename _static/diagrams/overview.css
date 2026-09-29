@@ -1,0 +1,68 @@
+/* Shared layout and visual style for chapter overview diagrams. */
+:root {
+    --overview-blue: #245d96;
+    --overview-fill: #e0ebf8;
+    --overview-border: #93b6df;
+    --overview-surface: #f6f9fd;
+    --overview-purple: #7953b6;
+    --agent-fill: #e8edf2;
+    --arrow: #526d7e;
+  }
+  :root[data-theme="dark"] {
+    --overview-blue: #274d75;
+    --overview-fill: #203b58;
+    --overview-border: #759cc7;
+    --overview-surface: #192737;
+    --overview-purple: #6b49a2;
+    --agent-fill: #253443;
+    --arrow: #a4b9cb;
+  }
+  body { padding: 10px; }
+  .overview { display: grid; grid-template-columns: 1fr .85fr 3fr; align-items: center; }
+  .agent { padding: 15px 8px; background: var(--agent-fill); border: 1px solid var(--border); border-radius: 9px; }
+  .agent strong { display: block; font-size: 17px; font-weight: 600; }
+  .agent small { display: block; font-size: 11px; color: var(--muted); }
+  .cycle { display: block; font-size: 35px; line-height: 1.3; color: var(--arrow); }
+  .links { padding: 0 4px; }
+  .link { position: relative; padding: 0 0 9px; color: var(--arrow); font-size: 11px; text-align: center; }
+  .link + .link { margin-top: 25px; }
+  .link::before { content: ''; position: absolute; bottom: 0; left: 0; right: 0; border-top: 2px solid currentColor; }
+  .link::after { content: ''; position: absolute; bottom: -4px; border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
+  .input::after { right: 0; border-left: 7px solid currentColor; }
+  .output::after { left: 0; border-right: 7px solid currentColor; }
+  .link.active { color: var(--blue); font-weight: 650; }
+  .link.active::before { border-width: 3px; }
+  .resource-group { border: 1.5px solid var(--overview-border); border-radius: 10px; background: var(--overview-surface); overflow: hidden; }
+  .resource-group header { background: var(--overview-blue); color: white; font-size: 18px; font-weight: 650; padding: 10px 13px; line-height: 1.2; }
+  .source-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; padding: 14px 12px 0; }
+  .source { padding: 10px 5px; background: var(--overview-fill); border: 1px solid var(--overview-border); border-bottom: 5px solid var(--overview-purple); border-radius: 7px; }
+  .source strong { display: block; font-size: 13px; line-height: 1.3; font-weight: 600; }
+  .source small { display: block; margin-top: 8px; font-size: 11px; color: var(--muted); }
+  .support { text-align: center; font-size: 11px; color: var(--muted); margin: 10px 0 5px; }
+  .foundation { display: block; width: calc(100% - 24px); margin: 0 12px 12px; padding: 8px; border: 1px solid transparent; border-radius: 6px; background: var(--overview-purple); color: white; }
+  .foundation strong { display: block; font-size: 13px; }
+  .foundation small { display: block; margin-top: 3px; font-size: 11px; }
+  .agent.active, .source.active { outline: 2px dashed var(--blue); outline-offset: 2px; }
+  [data-select][aria-pressed="true"] { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .detail { position: relative; margin-top: 10px; min-height: 123px; }
+  .detail h2 { padding-right: 105px; }
+  .reset { position: absolute; top: 8px; right: 8px; padding: 3px 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--soft); font-size: 12px; }
+  .reset[aria-pressed="true"] { outline: none; }
+  @media (max-width: 560px) {
+    .overview { grid-template-columns: 1fr; }
+    .agent { display: flex; align-items: center; justify-content: space-around; gap: 8px; padding: 6px 10px; }
+    .agent strong { font-size: 15px; }
+    .cycle { font-size: 24px; }
+    .links { display: flex; justify-content: space-around; padding: 8px 0; }
+    .link, .link + .link { margin: 0; padding: 0 15px 0 0; }
+    .link::before { display: none; }
+    .link::after { border: 0; inset: 0 0 auto auto; }
+    .input::after { content: '↓'; }
+    .output::after { content: '↑'; }
+    .resource-group header { font-size: 16px; padding: 8px 10px; }
+    .source-grid { grid-template-columns: 1fr 1.35fr .85fr; padding: 10px 9px 0; gap: 7px; }
+    .source { padding: 8px 3px; }
+    .source strong { font-size: 11px; }
+    .source small { font-size: 10px; margin-top: 5px; }
+    .detail { min-height: 145px; }
+  }

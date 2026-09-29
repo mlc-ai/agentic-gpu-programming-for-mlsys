@@ -1,0 +1,30 @@
+### Synccheck (CPU)
+# synccheck
+synccheck ERROR - 1 finding(s); native phase cluster_overtake, 2 executor polls
+
+=== Verdict findings (1) ===
+  [ERROR] mbarrier_arrive_before_consumption: next-generation arrive attempted on PhysicalBarrierId { allocation_id: 0, byte_offset: 0, target_global_cta_id: 0 } before generation 0 was consumed; prior event: kernel:0/warp:1/seq:7/source:op:91/loops:[] at kernel:0/warp:1/seq:10/source:op:146/loops:[]
+    Source: warp 1, source op #146
+      at cluster_overtake.py:50:1
+        50 |                 txl.ptx["mbarrier.arrive.release.cluster.shared::cluster.b64"](remote)
+           | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# synccheck --fixed
+synccheck CLEAN - 0 finding(s); native phase cluster_overtake, 8 executor polls, 5 verifier states / 27 verifier transitions
+### GPU
+# gpu                          buggy  finished, out = [1, 2, 3]
+# gpu --slow-consumer          HUNG (killed after 60 s)
+# gpu --fixed                  fixed  finished, out = [1, 2, 3]
+# gpu --fixed --slow-consumer  fixed slow-consumer finished, out = [1, 2, 3]
+### compute-sanitizer Version 2026.1.0.0 (build 37182542) (public-release) on the buggy kernel
+# synccheck run 1: buggy  finished, out = [1, 2, 3] ========= ERROR SUMMARY: 0 errors 
+# synccheck run 2: buggy  finished, out = [1, 2, 3] ========= ERROR SUMMARY: 0 errors 
+# synccheck run 3: buggy  finished, out = [1, 2, 3] ========= ERROR SUMMARY: 0 errors 
+# racecheck run 1: buggy  finished, out = [1, 2, 3] ========= RACECHECK SUMMARY: 0 hazards displayed (0 errors, 0 warnings) 
+# racecheck run 2: buggy  finished, out = [1, 2, 3] ========= RACECHECK SUMMARY: 0 hazards displayed (0 errors, 0 warnings) 
+# racecheck run 3: buggy  finished, out = [1, 2, 3] ========= RACECHECK SUMMARY: 0 hazards displayed (0 errors, 0 warnings) 
+# memcheck run 1: buggy  finished, out = [1, 2, 3] ========= ERROR SUMMARY: 0 errors 
+# memcheck run 2: buggy  finished, out = [1, 2, 3] ========= ERROR SUMMARY: 0 errors 
+# memcheck run 3: buggy  finished, out = [1, 2, 3] ========= ERROR SUMMARY: 0 errors 
+# initcheck run 1: buggy  finished, out = [1, 2, 3] ========= ERROR SUMMARY: 0 errors 
+# initcheck run 2: buggy  finished, out = [1, 2, 3] ========= ERROR SUMMARY: 0 errors 
+# initcheck run 3: buggy  finished, out = [1, 2, 3] ========= ERROR SUMMARY: 0 errors 

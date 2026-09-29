@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One kernel, three views</title>
+<link rel="stylesheet" href="diagrams.css">
+<script src="diagrams.js" defer></script>
+<style>
+  h2 { margin: 0 0 5px; font-size: 18px; }
+  .subtitle { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+  .cols { display: grid; grid-template-columns: minmax(0, 1fr) 24px minmax(0, 1.1fr) 24px minmax(0, 1.05fr); align-items: stretch; }
+  .card { min-width: 0; padding: 11px 12px; border: 1px solid; border-radius: 6px; }
+  .card.blue { background: var(--blue-bg); border-color: color-mix(in srgb, var(--blue) 45%, var(--surface)); }
+  .card.amber { background: var(--amber-bg); border-color: color-mix(in srgb, var(--amber) 45%, var(--surface)); }
+  .card-h { font-size: 14px; font-weight: 650; margin-bottom: 9px; }
+  .card pre { white-space: pre; overflow-x: auto; margin-bottom: 7px; }
+  .card small { display: block; margin-bottom: 7px; color: var(--muted); font-size: 12px; }
+  .gap { height: 6px; }
+  .op { color: var(--blue); font-weight: 650; }
+  .arrow { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 15px; }
+  .foot { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px; }
+  .foot small { color: var(--muted); font-size: 12px; }
+  .foot .flow-line { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .foot .flow-line span { color: var(--muted); }
+  @media (max-width: 600px) {
+    .cols { grid-template-columns: 1fr; }
+    .arrow { height: 22px; transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h2>One kernel, three views</h2>
+  <p class="subtitle">The same addition at each level of vector_add</p>
+  <div class="cols">
+    <div class="card blue">
+      <div class="card-h">TIRx-lite source</div>
+      <div class="gap"></div>
+      <pre>txl.ptx.<span class="op">add.f32</span>(x, x, y)</pre>
+      <div class="gap"></div>
+      <small>vector_add</small>
+    </div>
+    <div class="arrow" aria-hidden="true">→</div>
+    <div class="card amber">
+      <div class="card-h">TIRx IR</div>
+      <pre>T.ptx.<span class="op">add</span>(
+    buffer, buffer,
+    buffer_1, ...)</pre>
+      <small>vector_add.func,<br>read by the analyses</small>
+    </div>
+    <div class="arrow" aria-hidden="true">→</div>
+    <div class="card blue">
+      <div class="card-h">Generated CUDA</div>
+      <pre>asm("<span class="op">add.f32</span> %0, %1, %2;"
+    : "=f"(__d)
+    : "f"(__a), "f"(__b));</pre>
+      <small>vector_add.source()</small>
+    </div>
+  </div>
+  <div class="foot"><small>Output abridged.</small><div class="flow-line">CUDA <span>→</span> <code>ptxas</code> <span>→</span> Machine code</div></div>
+</main>
+</body>
+</html>

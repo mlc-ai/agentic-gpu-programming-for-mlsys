@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Components of an agentic compiler harness</title>
+<link rel="stylesheet" href="diagrams.css">
+<link rel="stylesheet" href="overview.css">
+<link rel="stylesheet" href="harness-map.css">
+<script src="diagrams.js" defer></script>
+</head>
+<body>
+<main data-selection>
+  <p class="scroll-hint">Scroll horizontally to explore the full diagram.</p>
+  <div class="diagram-scroll" role="region" aria-label="Compiler harness architecture; scroll horizontally on small screens" tabindex="0">
+  <!-- Preserve Part I's component geometry; render every label with the shared HTML font. -->
+  <div class="harness-map" role="group" aria-label="Compiler harness components and their connections">
+    <div class="harness-boundary"><div class="harness-title">Compiler harness</div></div>
+    <div class="connection retrieve-connection" data-node="retrieve" aria-hidden="true"></div>
+    <div class="connection diagnostics-connection" data-node="diagnostics" aria-hidden="true"></div>
+    <div class="connection execution-connection" data-node="execution" aria-hidden="true"></div>
+    <div class="connection collect-connection" data-node="collect" aria-hidden="true"></div>
+    <span class="route-label retrieve-label">Retrieve</span>
+    <span class="route-label analyze-label">Analyze kernel</span>
+    <span class="route-label diagnostics-label">Diagnostics</span>
+    <span class="route-label execution-label">Run /<br>measure</span>
+    <span class="route-label collect-label">Collect</span>
+    <button class="map-node agent-node" data-select="workflow" data-node="workflow" data-highlights="retrieve diagnostics collect" aria-label="Agent workflow" aria-pressed="false" aria-controls="workflow"><strong>Agent workflow</strong><span class="cycle" aria-hidden="true">⟳</span></button>
+    <button class="map-node knowledge-node" data-select="knowledge" data-node="knowledge" data-highlights="workflow retrieve" aria-pressed="false" aria-controls="knowledge"><strong>Knowledge base</strong><span class="knowledge-parts"><span>Kernel zoo</span><span>Hardware specs<small>PTX / manuals</small></span></span></button>
+    <button class="map-node analysis-node" data-select="analysis" data-node="analysis" data-highlights="workflow diagnostics" aria-pressed="false" aria-controls="analysis"><strong>Domain-specific<br>compiler analysis</strong><span class="analysis-names"><span>Correctness checks</span><span>Numerical simulation</span></span></button>
+    <p class="foundation-note">Supports the components above</p>
+    <button class="map-node foundation-node" data-select="foundation" data-highlights="knowledge analysis benchmark" aria-pressed="false" aria-controls="foundation"><strong>Minimal foundation</strong><small>Minimal, stable IR<br>Extensible to HW primitives</small></button>
+    <button class="map-node benchmark-node" data-select="benchmark" data-node="benchmark" data-highlights="gpus execution" aria-pressed="false" aria-controls="benchmark"><strong>Benchmark<br>server</strong><small>Correctness + performance</small><span class="profiling"><small>Profiling</small>Profilers · Traces</span></button>
+    <button class="map-node gpu-node" data-select="gpus" data-node="gpus" data-highlights="benchmark execution" aria-label="GPUs" aria-pressed="false" aria-controls="gpus"><strong>GPUs</strong></button>
+    <button class="map-node improvement-node" data-select="improvement" data-highlights="workflow collect" aria-pressed="false" aria-controls="improvement"><span><strong>Self-improvement</strong><small>Across evolutions</small></span><span>Evolution traces<small>Improve tools</small></span><span>Optimized kernels<small>Grow knowledge</small></span></button>
+  </div>
+  </div>
+  <div class="detail" aria-live="polite">
+    <section id="overview" data-panel="overview"><h2>Components of an agentic compiler harness</h2><p>Select a component to inspect its role. The highlighted connections show how the agent uses it.</p></section>
+    <section id="workflow" data-panel="workflow" hidden><h2>Agent workflow</h2><p>The workflow coordinates optimization work. Agents retrieve knowledge, submit programs for analysis, run GPU experiments, and retain candidates and results to guide the next change.</p></section>
+    <section id="knowledge" data-panel="knowledge" hidden><h2>Knowledge base</h2><p>The agent retrieves complete kernels from the zoo and operation semantics from hardware specifications. Together they supply implementation ideas and the conditions needed to adapt them.</p></section>
+    <section id="analysis" data-panel="analysis" hidden><h2>Domain-specific compiler analysis</h2><p>The agent submits a kernel and receives diagnostics about its behavior. Reports identify the source operations and relationships involved so the agent can investigate and repair the implementation.</p></section>
+    <section id="foundation" data-panel="foundation" hidden><h2>Minimal foundation</h2><p>A small, stable program representation supports compilation and analysis. It exposes memory accesses, synchronization, and hardware operations, and can be extended as new primitives become available.</p></section>
+    <section id="benchmark" data-panel="benchmark" hidden><h2>Benchmark server</h2><p>The server runs the submitted correctness checks, benchmarks, and profiling captures on managed GPUs. It returns results and artifacts that the agent can use to compare candidates and investigate bottlenecks.</p></section>
+    <section id="gpus" data-panel="gpus" hidden><h2>GPUs</h2><p>The target devices execute the candidate kernels. The benchmark server coordinates their use so measurements from competing experiments do not interfere with one another.</p></section>
+    <section id="improvement" data-panel="improvement" hidden><h2>Self-improvement across runs</h2><p>Reviewing optimization results can expose gaps in tools and checks. Validated kernels add implementation knowledge to the zoo, improving the environment available to later agents.</p></section>
+    <button class="reset" data-select="overview" aria-pressed="true" aria-controls="overview">Clear selection</button>
+  </div>
+</main>
+</body>
+</html>

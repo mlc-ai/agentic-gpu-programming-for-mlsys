@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Review and harness improvement</title>
+<link rel="stylesheet" href="diagrams.css">
+<link rel="stylesheet" href="overview.css">
+<script src="diagrams.js" defer></script>
+<style>
+  .agent { min-height: 132px; }
+  .agent strong { font-size: 19px; }
+  .agent small { margin-top: 10px; }
+  .resource-group header { font-size: 20px; }
+  .source-grid { padding-bottom: 14px; }
+  .source { min-height: 108px; border-bottom: 1px solid var(--overview-border); }
+  .source strong { font-size: 16px; }
+  .source small { margin-top: 7px; }
+  .detail h2 { font-size: 16px; }
+  @media (max-width: 560px) {
+    .agent { min-height: 72px; }
+    .agent strong { font-size: 17px; }
+    .agent small { margin-top: 0; }
+    .resource-group header { font-size: 18px; }
+    .source-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; padding: 10px; }
+    .source { min-height: 100px; }
+    .source strong { font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+<main data-selection>
+  <div class="overview">
+    <button class="agent" data-select="review" data-node="review" data-highlights="evidence findings checks tools kernels" aria-pressed="false" aria-controls="review"><strong>Human review</strong><small>Examine assumptions<br>Accept or revise</small></button>
+    <div class="links">
+      <div class="link input" data-node="findings">Review findings</div>
+      <div class="link output" data-node="evidence">Kernel + evidence</div>
+    </div>
+    <section class="resource-group" aria-label="Compiler harness improvements">
+      <header>Compiler harness</header>
+      <div class="source-grid">
+        <button class="source" data-select="checks" data-node="checks" data-highlights="review findings" aria-pressed="false" aria-controls="checks"><strong>Numerical checks</strong><small>Cover missed inputs</small></button>
+        <button class="source" data-select="tools" data-node="tools" data-highlights="review findings" aria-pressed="false" aria-controls="tools"><strong>Analysis tools</strong><small>Fix incorrect diagnostics</small></button>
+        <button class="source" data-select="kernels" data-node="kernels" data-highlights="review findings" aria-pressed="false" aria-controls="kernels"><strong>Kernel zoo</strong><small>Reuse reviewed designs</small></button>
+      </div>
+    </section>
+  </div>
+  <div class="detail" aria-live="polite">
+    <section id="overview" data-panel="overview"><h2>Turn findings into improvements</h2><p>Review compares the implementation's numerical changes and input assumptions with the task and its evidence. Findings improve the checks, tools, and reference kernels available to later runs.</p></section>
+    <section id="review" data-panel="review" hidden><h2>Review the assumptions behind the speedup</h2><p>Check whether numerical rewrites and specializations hold throughout the required input domain. Investigate uncovered assumptions, revise the candidate when needed, and validate the result before reuse.</p></section>
+    <section id="checks" data-panel="checks" hidden><h2>Expand input coverage</h2><p>Turn an input that exposes an invalid optimization into a regular correctness check. Strong-decay cases, for example, reveal overflow and underflow in a separated decay calculation.</p></section>
+    <section id="tools" data-panel="tools" hidden><h2>Repair analysis tools</h2><p>Isolate an analysis tool defect with a small reproducer, validate its repair, and retain the reproducer as a regression test. Later agents then receive more reliable feedback from the same tool.</p></section>
+    <section id="kernels" data-panel="kernels" hidden><h2>Reuse reviewed kernels</h2><p>Keep the implementation with its supported inputs, validation results, timings, and design notes. Later agents can reuse a working kernel or adapt one of its techniques to another operator.</p></section>
+    <button class="reset" data-select="overview" aria-pressed="true" aria-controls="overview">Clear selection</button>
+  </div>
+</main>
+</body>
+</html>

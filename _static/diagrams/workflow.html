@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent workflow and compiler harness</title>
+<link rel="stylesheet" href="diagrams.css">
+<link rel="stylesheet" href="overview.css">
+<script src="diagrams.js" defer></script>
+<style>
+  .relationship { display: grid; grid-template-columns: 1.35fr .75fr 1.6fr; align-items: center; gap: 8px; }
+  .workflow-group { border: 1px solid var(--border); border-radius: 10px; background: var(--soft); padding-bottom: 10px; }
+  .workflow-heading { display: block; width: 100%; padding: 10px 8px; border: 0; border-radius: 9px 9px 0 0; background: var(--agent-fill); }
+  .workflow-heading strong { display: block; font-size: 18px; font-weight: 650; }
+  .workflow-heading small { display: block; margin-top: 4px; font-size: 11px; color: var(--muted); }
+  .agent-turn { display: flex; justify-content: center; align-items: center; gap: 10px; width: calc(100% - 24px); margin: 12px 12px 0; padding: 8px; border: 1px solid var(--border); border-radius: 7px; background: var(--agent-fill); }
+  .agent-turn strong { display: block; font-size: 18px; }
+  .agent-turn small { display: block; font-size: 11px; color: var(--muted); }
+  .agent-turn .cycle { font-size: 32px; }
+  .harness-node { min-height: 148px; padding: 24px 14px; border: 1.5px solid var(--overview-border); border-radius: 10px; background: var(--overview-fill); }
+  .harness-node strong { font-size: 20px; font-weight: 650; }
+  button.active { outline: 2px dashed var(--blue); outline-offset: 2px; }
+  .detail { min-height: 112px; }
+  .detail h2 { font-size: 16px; }
+  @media (max-width: 650px) {
+    .relationship { grid-template-columns: 1fr; gap: 0; }
+    .links { display: flex; justify-content: space-around; padding: 10px 0; }
+    .link, .link + .link { margin: 0; padding: 0 16px 0 0; }
+    .link::before { display: none; }
+    .link::after { border: 0; inset: 0 0 auto auto; }
+    .input::after { content: '↓'; }
+    .output::after { content: '↑'; }
+    .harness-node { min-height: 100px; }
+  }
+</style>
+</head>
+<body>
+<main data-selection>
+  <div class="relationship">
+    <section class="workflow-group" aria-label="Agent workflow">
+      <button class="workflow-heading" data-select="workflow" data-node="workflow" data-highlights="agent" aria-pressed="false" aria-controls="workflow"><strong>Agent workflow</strong><small>Assign work · continue · stop</small></button>
+      <button class="agent-turn" data-select="agent" data-node="agent" data-highlights="requests feedback harness" aria-pressed="false" aria-controls="agent"><span class="cycle" aria-hidden="true">⟳</span><span><strong>Agent</strong><small>Work across turns</small></span></button>
+    </section>
+    <div class="links">
+      <div class="link input" data-node="requests">Queries &amp;<br>tool calls</div>
+      <div class="link output" data-node="feedback">Knowledge &amp;<br>feedback</div>
+    </div>
+    <button class="harness-node" data-select="harness" data-node="harness" data-highlights="agent requests feedback" aria-pressed="false" aria-controls="harness"><strong>Compiler harness</strong></button>
+  </div>
+  <div class="detail" aria-live="polite">
+    <section id="overview" data-panel="overview"><h2>Workflow and compiler harness</h2><p>The workflow organizes the ongoing search. Agents carry out the work through the compiler harness and use its feedback to decide what to try next.</p></section>
+    <section id="workflow" data-panel="workflow" hidden><h2>Coordinate work across turns</h2><p>The workflow assigns optimization work, keeps the task moving across agent turns, and controls when to continue or stop.</p></section>
+    <section id="agent" data-panel="agent" hidden><h2>Agents use the compiler harness</h2><p>In each turn, the agent works toward the assigned objective, calls the compiler harness, and interprets the returned feedback to choose its next experiment.</p></section>
+    <section id="harness" data-panel="harness" hidden><h2>Support the agent's work</h2><p>The compiler harness provides the programming environment and tools the agent uses to implement and evaluate kernels. It returns feedback that guides further changes.</p></section>
+    <button class="reset" data-select="overview" aria-pressed="true" aria-controls="overview">Clear selection</button>
+  </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,69 @@
+:root {
+  /* Match Modern GPU Programming's shared viz-base.css. */
+  --font-mono: "SF Mono", "Fira Code", monospace;
+  color-scheme: light;
+  --text: #1e293b; --muted: #475569; --surface: #fff;
+  --soft: #f8fafc; --border: #cbd5e1;
+  --blue: #2563eb; --blue-bg: #dbeafe;
+  --green: #047857; --green-bg: #dcfce7;
+  --purple: #7c3aed; --purple-bg: #ede9fe;
+  --amber: #b45309; --amber-bg: #fffbeb;
+  --red: #b91c1c; --red-bg: #fee2e2;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --text: #e2e8f0; --muted: #cbd5e1; --surface: #141b28;
+  --soft: #1e293b; --border: #475569;
+  --blue: #93c5fd; --blue-bg: #172f50;
+  --green: #86efac; --green-bg: #12382e;
+  --purple: #c4b5fd; --purple-bg: #30234f;
+  --amber: #fcd34d; --amber-bg: #3b301b;
+  --red: #fca5a5; --red-bg: #48252c;
+}
+* { box-sizing: border-box; }
+body { margin: 0; padding: 16px; font: 14px/1.4 "Inter", "SF Pro", "Segoe UI", system-ui, sans-serif; color: var(--text); background: var(--surface); }
+p { margin: 0; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+[hidden] { display: none !important; }
+.label { color: var(--muted); font-size: 12px; font-weight: 650; margin-bottom: 7px; }
+.band { padding: 9px 12px; background: var(--soft); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 12px; }
+.band strong { margin-right: 6px; }
+.flow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; margin-bottom: 14px; }
+.flow-node { position: relative; padding: 9px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--soft); text-align: center; }
+.flow-node:not(:last-child)::after { content: '→'; position: absolute; right: -19px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+.flow-node strong, .component strong { display: block; font-size: 14px; }
+.flow-node small, .component small { display: block; margin-top: 2px; font-size: 12px; color: var(--muted); }
+.flow-node.active { border-color: var(--blue); background: var(--blue-bg); }
+.harness { padding: 11px; border: 1px solid var(--border); border-radius: 8px; }
+.components { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.component { border: 2px solid var(--tone, var(--border)); border-radius: 6px; padding: 9px 7px; background: var(--tint, var(--soft)); text-align: center; }
+.component[aria-pressed="true"] { outline: 2px solid var(--tone, var(--blue)); outline-offset: 2px; }
+.blue { --tone: var(--blue); --tint: var(--blue-bg); }
+.green { --tone: var(--green); --tint: var(--green-bg); }
+.purple { --tone: var(--purple); --tint: var(--purple-bg); }
+.amber { --tone: var(--amber); --tint: var(--amber-bg); }
+.detail { border: 1px solid var(--border); border-radius: 6px; padding: 11px 13px; margin-top: 12px; min-height: 100px; background: var(--soft); }
+.detail h2 { font-size: 14px; margin: 0 0 5px; }
+.detail p + p { margin-top: 6px; }
+.route { color: var(--blue); font-size: 12px; font-weight: 600; }
+.legend { margin-top: 9px; color: var(--muted); font-size: 12px; }
+code, pre { font: 12px/1.65 var(--font-mono); }
+pre { white-space: pre-wrap; margin: 0; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.controls button { padding: 6px 11px; border: 1px solid var(--border); border-radius: 5px; background: var(--soft); }
+.controls button[aria-pressed="true"] { border-color: var(--blue); color: var(--blue); background: var(--blue-bg); }
+.two-col { display: grid; grid-template-columns: 1.3fr 1fr; gap: 14px; }
+.code { border: 1px solid var(--border); border-radius: 6px; padding: 10px; background: var(--soft); }
+.code-line { display: block; width: 100%; text-align: left; padding: 2px 4px; border: 1px solid transparent; border-radius: 3px; background: transparent; font: 12px/1.7 var(--font-mono); white-space: pre-wrap; }
+button.code-line { background: var(--red-bg); border-color: var(--red); }
+.code-line.active { outline: 2px solid var(--blue); }
+.line-number { display: inline-block; width: 15px; color: var(--muted); }
+@media (max-width: 520px) {
+  body { padding: 12px; }
+  .components { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .two-col { grid-template-columns: 1fr; }
+  .flow { gap: 16px; }
+  .flow-node { padding: 7px 4px; }
+  .flow-node:not(:last-child)::after { right: -14px; }
+}

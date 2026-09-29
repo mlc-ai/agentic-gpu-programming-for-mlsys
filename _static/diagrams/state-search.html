@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>State search for the three-round cross-CTA example</title>
+<link rel="stylesheet" href="diagrams.css"><script src="diagrams.js" defer></script>
+<style>
+  .two-col { grid-template-columns: 1fr 1.15fr; }
+  .code-line { font-size: 11px; }
+  .graph { position: relative; margin: 12px 0 0; }
+  .state { position: absolute; left: 0; width: 40%; height: 44px; padding: 3px; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 1px solid var(--border); border-radius: 5px; background: var(--soft); text-align: center; }
+  .state code { font-size: 12px; line-height: 1.4; font-weight: 650; }
+  .state small { font-size: 10px; color: var(--muted); }
+  .finished { border-color: var(--green); background: var(--green-bg); }
+  .error { left: 68%; width: 32%; border-color: var(--red); background: var(--red-bg); }
+  .edge { position: absolute; color: var(--muted); }
+  .edge span { position: absolute; font-size: 10px; line-height: 1.2; white-space: nowrap; }
+  .edge::after { content: ''; position: absolute; }
+  .down { left: 20%; height: 24px; border-left: 2px solid currentColor; }
+  .down span { left: 8px; top: 5px; }
+  .down::after { bottom: 0; left: -5px; border-top: 5px solid currentColor; border-left: 4px solid transparent; border-right: 4px solid transparent; }
+  .branch { left: 40%; width: 28%; border-top: 2px solid currentColor; }
+  .branch span { left: 0; right: 0; bottom: 6px; text-align: center; }
+  .branch::after { right: 0; top: -5px; border-left: 5px solid currentColor; border-top: 4px solid transparent; border-bottom: 4px solid transparent; }
+  [data-state="complete"] { --path: var(--green); }
+  [data-state="counterexample"] { --path: var(--red); }
+  [data-state="all"] { --path: var(--blue); }
+  .state.active, .code-line.active { outline: 2px solid var(--path); outline-offset: 1px; }
+  .edge.active { color: var(--path); }
+  [data-state]:not([data-state="all"]) .graph [data-node]:not(.active) { opacity: .35; }
+  .detail { min-height: 112px; }
+  @media (max-width: 580px) {
+    .two-col { grid-template-columns: 1fr; }
+    .graph { max-width: 400px; }
+  }
+</style>
+</head>
+<body>
+<main data-selection data-state="all">
+  <div class="controls" aria-label="Path through the example program's state graph">
+    <button data-select="all" data-state="all" data-highlights="code-arrive code-wait" aria-pressed="true" aria-controls="all">Search branches</button>
+    <button data-select="complete" data-state="complete" aria-pressed="false" aria-controls="complete">Consumer keeps up</button>
+    <button data-select="counterexample" data-state="counterexample" aria-pressed="false" aria-controls="counterexample">Producer overtakes</button>
+  </div>
+  <div class="two-col">
+    <section>
+      <p class="label">Pseudocode · three rounds</p>
+      <div class="code">
+        <span class="code-line"><span class="line-number">1</span>if cta == 1:  # producer</span>
+        <span class="code-line"><span class="line-number">2</span>  for round in range(3):</span>
+        <span class="code-line" data-node="code-arrive"><span class="line-number">3</span>    arrive_remote(full)</span>
+        <span class="code-line"><span class="line-number">4</span>if cta == 0:  # consumer</span>
+        <span class="code-line"><span class="line-number">5</span>  for round in range(3):</span>
+        <span class="code-line" data-node="code-wait"><span class="line-number">6</span>    wait(full, round % 2)</span>
+        <span class="code-line"><span class="line-number">7</span>    out[round] = round + 1</span>
+      </div>
+      <p class="legend">One thread per CTA executes the protocol. Barrier <code>full</code> lives on CTA 0 and needs one arrival per phase. Initialization is complete.</p>
+      <div class="band" style="margin-top:12px"><strong>State</strong><br>P = producer arrivals<br>C = completed consumer waits<br>Each arrival advances the phase; parity = phase % 2.</div>
+      <p class="legend">The search stops a branch when the producer completes a second phase before the consumer observes the first.</p>
+    </section>
+    <section>
+      <p class="label">Reachable states · L = pseudocode line</p>
+      <div class="graph" role="group" aria-label="State search of three arrivals and three waits, with branches for producer overtaking."></div>
+    </section>
+  </div>
+  <div class="detail" aria-live="polite">
+    <section id="all" data-panel="all"><h2>Try each enabled event</h2><p>After either of the first two arrivals, the consumer can finish its wait or the producer can arrive again. The search explores both choices. Red states mark a phase completed before the preceding phase was observed.</p></section>
+    <section id="complete" data-panel="complete" hidden><h2>All three rounds complete</h2><p>Each wait at line 6 observes its phase before the next arrival completes another phase. The path reaches P3 C3: three arrivals and three completed waits.</p></section>
+    <section id="counterexample" data-panel="counterexample" hidden><h2>The second arrival overtakes the first wait</h2><p>The prefix P0 C0 → P1 C0 → P2 C0 reaches phase 2, with parity back at 0. The phase-1 arrival at line 3 overtakes the consumer's phase-0 wait at line 6. The checker can return this prefix as the counterexample.</p></section>
+  </div>
+</main>
+<script>
+(() => {
+  const rounds = 3;
+  const key = (p, c) => `s${p}-${c}`;
+  const states = new Map([[key(0, 0), { p: 0, c: 0 }]]);
+  const queue = [...states.values()];
+  const edges = [];
+  for (let i = 0; i < queue.length; i++) {
+    const state = queue[i];
+    if (state.p - state.c > 1) continue;
+    const next = [];
+    if (state.p < rounds) next.push({ p: state.p + 1, c: state.c, event: 'arrive · L3' });
+    if (state.p === state.c + 1) next.push({ p: state.p, c: state.c + 1, event: `wait(${state.c % 2}) · L6` });
+    next.forEach(target => {
+      const from = key(state.p, state.c), to = key(target.p, target.c);
+      edges.push({ from, to, event: target.event });
+      if (!states.has(to)) {
+        states.set(to, { p: target.p, c: target.c });
+        queue.push(states.get(to));
+      }
+    });
+  }
+  const graph = document.querySelector('.graph');
+  graph.style.height = `${rounds * 2 * 68 + 44}px`;
+  states.forEach((state, id) => {
+    const error = state.p - state.c > 1;
+    const step = error ? state.p + state.c - 1 : state.p + state.c;
+    const node = document.createElement('div');
+    node.className = `state${error ? ' error' : state.c === rounds ? ' finished' : ''}`;
+    node.dataset.node = id;
+    node.style.top = `${step * 68}px`;
+    node.innerHTML = `<code>P${state.p} C${state.c}</code><small>phase ${state.p} · parity ${state.p % 2}</small>`;
+    graph.append(node);
+  });
+  edges.forEach(edge => {
+    const from = states.get(edge.from), to = states.get(edge.to);
+    const error = to.p - to.c > 1;
+    const node = document.createElement('div');
+    node.className = `edge ${error ? 'branch' : 'down'}`;
+    node.dataset.node = `${edge.from}-${edge.to}`;
+    node.style.top = `${(from.p + from.c) * 68 + (error ? 22 : 44)}px`;
+    const label = document.createElement('span');
+    label.textContent = edge.event;
+    node.append(label);
+    graph.append(node);
+  });
+  const safe = [...states].filter(([, state]) => state.p - state.c <= 1).map(([id]) => id);
+  const completingEdges = edges.filter(edge => safe.includes(edge.to)).map(edge => `${edge.from}-${edge.to}`);
+  document.querySelector('[data-select="complete"]').dataset.highlights = ['code-arrive', 'code-wait', ...safe, ...completingEdges].join(' ');
+  const first = key(0, 0), arrived = key(1, 0), error = key(2, 0);
+  document.querySelector('[data-select="counterexample"]').dataset.highlights = ['code-arrive', 'code-wait', first, arrived, error, `${first}-${arrived}`, `${arrived}-${error}`].join(' ');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>An in-kernel timeline</title>
+<link rel="stylesheet" href="diagrams.css">
+<script src="diagrams.js" defer></script>
+<style>
+  h2 { margin: 0 0 5px; font-size: 18px; }
+  .subtitle { color: var(--muted); font-size: 13px; }
+  .lanes { margin-top: 24px; }
+  .lane { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 12px; align-items: center; margin-bottom: 24px; }
+  .lane-name { font-size: 13px; font-weight: 600; }
+  .ranges { display: grid; grid-template-columns: repeat(156, minmax(0, 1fr)); min-height: 32px; }
+  .range { position: relative; display: flex; align-items: center; justify-content: center; min-width: 0; border: 1px solid var(--border); border-radius: 4px; font-size: 12px; }
+  .load { background: var(--green-bg); }
+  .compute { background: var(--blue-bg); }
+  .store { background: var(--soft); }
+  .wait { background: repeating-linear-gradient(125deg, transparent 0 6px, rgb(180 130 50 / 16%) 6px 8px), var(--amber-bg); }
+  .load::before, .marker-swatch { width: 7px; height: 7px; border-radius: 50%; background: var(--blue); }
+  .load::before { content: ''; position: absolute; left: -4px; top: -11px; }
+  .axis { position: relative; margin-left: 102px; padding-top: 7px; border-top: 1px solid var(--muted); text-align: right; color: var(--muted); font-size: 12px; }
+  .axis::after { content: ''; position: absolute; right: -1px; top: -4px; border-left: 7px solid var(--muted); border-top: 3px solid transparent; border-bottom: 3px solid transparent; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 24px; margin-top: 18px; }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .range-swatch { display: inline-block; width: 24px; height: 14px; border: 1px solid var(--border); border-radius: 3px; background: var(--blue-bg); }
+  .marker-swatch { display: inline-block; }
+  @media (max-width: 560px) {
+    .lane { grid-template-columns: minmax(0, 1fr); gap: 14px; margin-bottom: 15px; }
+    .range { font-size: 10px; }
+    .axis { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h2>An in-kernel timeline</h2>
+  <p class="subtitle">Named ranges and markers place every warp's work on one time axis.</p>
+  <div class="lanes" role="img" aria-label="Illustrative timeline for three warps in one CTA. The TMA warp loads three tiles back to back. The MMA warp waits for each tile and computes it quickly. The epilogue waits for the last MMA and stores the result. Dots mark when loads are issued.">
+    <div class="lane">
+      <span class="lane-name">TMA warp</span>
+      <div class="ranges">
+        <span class="range load" style="grid-column: 1 / span 35">load</span>
+        <span class="range load" style="grid-column: 37 / span 35">load</span>
+        <span class="range load" style="grid-column: 73 / span 35">load</span>
+      </div>
+    </div>
+    <div class="lane">
+      <span class="lane-name">MMA warp</span>
+      <div class="ranges">
+        <span class="range wait" style="grid-column: 1 / span 35">wait</span>
+        <span class="range compute" style="grid-column: 37 / span 16">MMA</span>
+        <span class="range wait" style="grid-column: 54 / span 18">wait</span>
+        <span class="range compute" style="grid-column: 73 / span 16">MMA</span>
+        <span class="range wait" style="grid-column: 90 / span 18">wait</span>
+        <span class="range compute" style="grid-column: 109 / span 16">MMA</span>
+      </div>
+    </div>
+    <div class="lane">
+      <span class="lane-name">Epilogue</span>
+      <div class="ranges">
+        <span class="range wait" style="grid-column: 1 / span 124">wait</span>
+        <span class="range store" style="grid-column: 126 / span 31">store</span>
+      </div>
+    </div>
+    <div class="axis">time</div>
+  </div>
+  <div class="legend">
+    <span><i class="range-swatch" aria-hidden="true"></i>Range: start and end of a stage</span>
+    <span><i class="marker-swatch" aria-hidden="true"></i>Marker: a single moment</span>
+  </div>
+</main>
+</body>
+</html>

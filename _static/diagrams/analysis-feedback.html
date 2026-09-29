@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Program in, report out</title>
+<link rel="stylesheet" href="diagrams.css">
+<script src="diagrams.js" defer></script>
+<style>
+  h2 { margin: 0 0 5px; font-size: 18px; }
+  .subtitle { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-bottom: 12px; }
+  .toolbar .controls { margin: 0; align-items: center; }
+  .toolbar .label { margin: 0 2px 0 0; }
+  .code pre { white-space: pre; overflow-x: auto; }
+  .bug { background: var(--red-bg); border: 1px solid var(--red); border-radius: 3px; }
+  .fix { background: var(--green-bg); border: 1px solid var(--green); border-radius: 3px; }
+  .cm { color: var(--muted); }
+  .err { color: var(--red); font-weight: 650; }
+  .ok { color: var(--green); font-weight: 650; }
+  .advance { height: 24px; color: var(--muted); font-size: 18px; text-align: center; }
+  .detail { min-height: 70px; }
+</style>
+</head>
+<body>
+<main>
+  <h2>Program in, report out</h2>
+  <p class="subtitle">Two minimal kernels whose bugs rarely show on the GPU</p>
+  <div class="toolbar">
+    <div class="controls" aria-label="Checker"><span class="label">Checker</span>
+      <button data-tool="sync" aria-pressed="true">Synccheck</button><button data-tool="race" aria-pressed="false">Racecheck</button></div>
+    <div class="controls" aria-label="Program"><span class="label">Program</span>
+      <button data-ver="bug" aria-pressed="true">Buggy</button><button data-ver="fix" aria-pressed="false">Fixed</button></div>
+  </div>
+  <p class="label">TIRx-lite source · <span id="prog-label"></span></p>
+  <div class="code"><pre id="prog"></pre></div>
+  <div class="advance" aria-hidden="true">↓</div>
+  <p class="label" id="rep-label">Report</p>
+  <div class="code"><pre id="rep"></pre></div>
+  <div class="detail" id="note"></div>
+</main>
+<script>
+var D = {
+  sync: {
+    label: 'producer on CTA 1, consumer on CTA 0',
+    bug:
+'for r in range(ROUNDS):\n' +
+'    with txl.If(rank == 1):             <span class="cm"># producer</span>\n' +
+'\n' +
+'        <span class="bug">remote_arrive(full, cta=0)</span>      <span class="cm"># never waits</span>\n' +
+'    with txl.If(rank == 0):             <span class="cm"># consumer</span>\n' +
+'        txl.cuda.mbarrier_wait(full, r % 2)\n' +
+'        store_result(r)\n' +
+' ',
+    fix:
+'for r in range(ROUNDS):\n' +
+'    with txl.If(rank == 1):             <span class="cm"># producer</span>\n' +
+'        <span class="fix">txl.cuda.mbarrier_wait(empty, (r-1) % 2)</span>\n' +
+'        remote_arrive(full, cta=0)\n' +
+'    with txl.If(rank == 0):             <span class="cm"># consumer</span>\n' +
+'        txl.cuda.mbarrier_wait(full, r % 2)\n' +
+'        store_result(r)\n' +
+'        <span class="fix">remote_arrive(empty, cta=1)</span>',
+    repBug:
+'<span class="err">synccheck ERROR</span> - 1 finding(s)\n' +
+'  [ERROR] mbarrier_arrive_before_consumption: next-generation arrive\n' +
+'          attempted on ... before generation 0 was consumed\n' +
+'    Source: warp 1, loop iteration 1\n' +
+'      50 |  txl.ptx["mbarrier.arrive.release.cluster.shared::cluster.b64"](remote)',
+    repFix:
+'<span class="ok">synccheck CLEAN</span> - 0 finding(s); 5 verifier states / 27 verifier transitions',
+    noteBug: '<h2>Producer overtaking</h2><p>On the GPU this kernel usually finishes, because the consumer keeps up; it hangs only when the consumer falls behind. Synccheck searches every interleaving on the CPU and finds the order that hangs.</p>',
+    noteFix: '<h2>Fixed</h2><p>An <code>empty</code> barrier makes the producer wait until the consumer has used each phase. Every interleaving now finishes.</p>'
+  },
+  race: {
+    label: 'warpgroup 0 writes TMEM, warpgroup 1 reads it',
+    bug:
+'with txl.If(warpgroup == 0):           <span class="cm"># writer</span>\n' +
+'    <span class="bug">txl.ptx[TMEM_ST](addr, *regs)</span>\n' +
+'    txl.ptx.tcgen05.wait__st.sync.aligned()\n' +
+'\n' +
+'with txl.If(warpgroup == 1):           <span class="cm"># reader</span>\n' +
+'    <span class="bug">txl.ptx[TMEM_LD](*regs, addr)</span>\n' +
+'    txl.ptx.tcgen05.wait__ld.sync.aligned()',
+    fix:
+'with txl.If(warpgroup == 0):           <span class="cm"># writer</span>\n' +
+'    txl.ptx[TMEM_ST](addr, *regs)\n' +
+'    txl.ptx.tcgen05.wait__st.sync.aligned()\n' +
+'<span class="fix">tmem_sync()           # tcgen05 fences around a CTA barrier</span>\n' +
+'with txl.If(warpgroup == 1):           <span class="cm"># reader</span>\n' +
+'    txl.ptx[TMEM_LD](*regs, addr)\n' +
+'    txl.ptx.tcgen05.wait__ld.sync.aligned()',
+    repBug:
+'<span class="err">racecheck ERROR</span>\n' +
+'  [ERROR] data_race: unordered read/write on tmem ...\n' +
+'          no synchronization edge orders the actors\n' +
+'    Prior:   warp 7\n' +
+'      52 |  txl.ptx[TMEM_LD](*(regs[i] for i in range(COLS)), addr)\n' +
+'    Current: warp 3\n' +
+'      47 |  txl.ptx[TMEM_ST](addr, *(regs[i] for i in range(COLS)))',
+    repFix:
+'<span class="ok">racecheck CLEAN</span>\nrace conflicts checked in global, shared, tmem',
+    noteBug: '<h2>Unordered TMEM handoff</h2><p>Each warpgroup waits for its own operation, but nothing orders the store before the load. Three GPU runs still produced correct output; Racecheck reports both source lines.</p>',
+    noteFix: '<h2>Fixed</h2><p>The fences and the CTA barrier order the TMEM write before the read on every schedule.</p>'
+  }
+};
+var tool = 'sync', ver = 'bug';
+function render() {
+  var d = D[tool];
+  document.getElementById('prog-label').textContent = d.label;
+  document.getElementById('prog').innerHTML = d[ver];
+  document.getElementById('rep-label').textContent = (tool === 'sync' ? 'Synccheck' : 'Racecheck') + ' report';
+  document.getElementById('rep').innerHTML = ver === 'bug' ? d.repBug : d.repFix;
+  document.getElementById('note').innerHTML = ver === 'bug' ? d.noteBug : d.noteFix;
+}
+function bind(attr, set) {
+  document.querySelectorAll('[' + attr + ']').forEach(function (b) {
+    b.addEventListener('click', function () {
+      set(b.getAttribute(attr));
+      document.querySelectorAll('[' + attr + ']').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+      render();
+    });
+  });
+}
+bind('data-tool', function (v) { tool = v; });
+bind('data-ver', function (v) { ver = v; });
+render();
+</script>
+</body>
+</html>
