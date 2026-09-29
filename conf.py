@@ -50,7 +50,7 @@ html_theme_options = {
     "use_fullscreen_button": False,
     "show_navbar_depth": 1,
     "show_toc_level": 2,
-    "home_page_in_toc": False,
+    "home_page_in_toc": True,
     "navbar_persistent": [],
 }
 html_show_sourcelink = True
