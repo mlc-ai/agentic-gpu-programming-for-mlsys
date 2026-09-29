@@ -38,41 +38,19 @@ jobs:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - name: Check publication configuration
-        id: deployment
-        env:
-          SITE_DEPLOY_KEY: ${{ secrets.MLC_SITE_DEPLOY_KEY }}
-        run: |
-          if [ -n "$SITE_DEPLOY_KEY" ]; then
-            echo 'enabled=true' >> "$GITHUB_OUTPUT"
-          else
-            echo 'Automatic publication requires MLC_SITE_DEPLOY_KEY. The book-html artifact is available for manual publication.' >> "$GITHUB_STEP_SUMMARY"
-          fi
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        if: steps.deployment.outputs.enabled == 'true'
-        with:
-          repository: mlc-ai/mlc-ai.github.io
-          ref: main
-          ssh-key: ${{ secrets.MLC_SITE_DEPLOY_KEY }}
-          path: site
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        if: steps.deployment.outputs.enabled == 'true'
         with:
           name: book-html
           path: book-html
-      - name: Publish the book under /agentic-gpu-programming-for-mlsys/
-        if: steps.deployment.outputs.enabled == 'true'
-        env:
-          SOURCE_SHA: ${{ github.sha }}
-        run: |
-          mkdir -p site/agentic-gpu-programming-for-mlsys
-          rsync -a --delete book-html/ site/agentic-gpu-programming-for-mlsys/
-          touch site/.nojekyll
-          git -C site config user.name 'github-actions[bot]'
-          git -C site config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git -C site add agentic-gpu-programming-for-mlsys .nojekyll
-          if ! git -C site diff --cached --quiet; then
-            git -C site commit -m "Publish book from $SOURCE_SHA"
-            git -C site push origin HEAD:main
-          fi
+      - name: Publish the built book to gh-pages
+        uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./book-html
+          # Keep Sphinx's _static and _sources directories available on Pages.
+          enable_jekyll: false
