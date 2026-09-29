@@ -43,6 +43,7 @@ html_static_path = ["_static"]
 html_css_files = ["book.css"]
 html_js_files = ["book-tabs.js", "fold-code.js"]
 html_theme_options = {
+    "logo": {"link": "https://mlc.ai/"},
     "repository_url": "https://github.com/mlc-ai/agentic-gpu-programming-for-mlsys",
     "use_repository_button": True,
     "use_download_button": False,
