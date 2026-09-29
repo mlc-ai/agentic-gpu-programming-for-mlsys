@@ -1,0 +1,495 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" data-theme="auto">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Benchmarking and Profiling &#8212; Agentic GPU Programming for MLSys</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "auto";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "auto";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/book.css?v=fde79067" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=a5fa425f"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'chapters/benchmarking';</script>
+    <script src="../_static/book-tabs.js?v=3241ad90"></script>
+    <script src="../_static/fold-code.js?v=cc72803f"></script>
+    <link rel="canonical" href="https://mlc.ai/agentic-gpu-programming-for-mlsys/chapters/benchmarking.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Agent Workflows" href="agent-workflows.html" />
+    <link rel="prev" title="Knowledge Base for Agents" href="knowledge.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="auto">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/mlc-logo-with-text-landscape.svg" class="logo__image only-light" alt="Agentic GPU Programming for MLSys - Home"/>
+    <script>document.write(`<img src="../_static/mlc-logo-with-text-landscape.svg" class="logo__image only-dark" alt="Agentic GPU Programming for MLSys - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Part I, Elements of Agentic GPU Programming</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">Domain-specific Compiler Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="knowledge.html">Knowledge Base for Agents</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Benchmarking and Profiling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="agent-workflows.html">Agent Workflows</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Part II, TIRx Harness Overview</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="harness.html">Introduction to TIRx Harness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tirx-compiler-foundation.html">TIRx Compiler Foundation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kcoral.html">KCoral Benchmark Server</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Part III, Agentic GPU Programming in Action</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="running-agent-workflows.html">Running Agent Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compiler-analysis-deepdive.html">Compiler Analysis Deep Dive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmark-server-deepdive.html">Benchmark Server Deep Dive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="self-improvement.html">Review and Harness Improvement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced-tips.html">Advanced Tips</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+<a href="https://github.com/mlc-ai/agentic-gpu-programming-for-mlsys" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Benchmarking and Profiling</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#benchmark-server">Benchmark Server</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#in-kernel-event-tracing">In-Kernel Event Tracing</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hardware-counter-profiling">Hardware Counter Profiling</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="benchmarking-and-profiling">
+<h1>Benchmarking and Profiling<a class="headerlink" href="#benchmarking-and-profiling" title="Link to this heading">#</a></h1>
+<p>An agent needs reliable performance measurements to judge whether a kernel
+change is an improvement. Other work running on the same GPU can distort
+these measurements, so benchmark runs need to be isolated from competing
+workloads.</p>
+<p>The agent also needs to understand why a kernel is slow. Profiling helps
+identify where time is spent and what limits performance, giving the agent
+a basis for choosing its next optimization.</p>
+<figure class="interactive-figure">
+  <iframe src="../_static/diagrams/benchmarking.html" title="Benchmarking and profiling for an agent" class="diagram-frame" height="420"></iframe>
+  <figcaption>Select a component to see how the agent uses it. The highlighted connections show the experiment submission, GPU execution, and returned feedback.</figcaption>
+</figure><p>In this chapter, we will describe how to isolate GPU experiments for
+reliable benchmarking and use profiling to understand performance
+bottlenecks.</p>
+<section id="benchmark-server">
+<h2>Benchmark Server<a class="headerlink" href="#benchmark-server" title="Link to this heading">#</a></h2>
+<p>When multiple agents share a GPU, concurrent experiments can interfere with
+each other’s correctness checks, timings, and profiles. A misleading result
+can send the search in the wrong direction, so the execution environment
+needs to coordinate GPU access across agents.</p>
+<p>Experiments can also affect later runs through the state they leave behind.
+Temporary files and process memory may persist, and a failed kernel can leave
+its CUDA context unusable. Agents could coordinate device access, clean up
+workspaces, and restart failed processes themselves, but doing so adds
+execution-management work to every search.</p>
+<p>The target GPU may also be on a remote server or an edge device.
+Even when the target device can host the agent, developing on a separate
+workstation leaves more of the device’s compute and memory for kernel
+execution and helps keep measurements consistent. A remote execution service
+runs the agent’s experiments on the target device and returns the results for
+local inspection.</p>
+<p>These needs call for a benchmark server that combines remote execution with
+isolation between experiments. It should give each experiment exclusive
+access to its assigned GPU, a private workspace, and a fresh process and CUDA
+context. The service handles cleanup and returns results to the agent’s
+development environment.</p>
+<p>Benchmark results tell the agent whether a candidate is faster, but choosing
+the next change requires understanding where time goes inside the kernel and
+what limits its progress. The same service should therefore support profiling
+on the target GPU and return timelines and hardware measurements for the agent
+to inspect.</p>
+</section>
+<section id="in-kernel-event-tracing">
+<h2>In-Kernel Event Tracing<a class="headerlink" href="#in-kernel-event-tracing" title="Link to this heading">#</a></h2>
+<p>High-performance kernels often divide work into stages, such as loading a
+tile, computing on it, and writing back the result. Different warps can handle
+these stages and overlap their execution. A single kernel latency does not
+reveal which stage delays the others, so locating bottlenecks in their
+cooperation requires:</p>
+<ul class="simple">
+<li><p><strong>Recording the start and end of each stage inside the kernel</strong>, separately
+for each CTA and warp;</p></li>
+<li><p><strong>Naming stages by meaning</strong>, such as “wait for TMA data,” “MMA compute,”
+and “write back,” so that the timeline maps back to the source;</p></li>
+<li><p><strong>Disturbing the measured execution as little as possible</strong>: recording must
+be cheap and must not add synchronization of its own.</p></li>
+</ul>
+<p><a class="reference external" href="https://docs.nvidia.com/cutlass/latest/media/docs/pythonDSL/guides/iket_profiling.html">IKET (In-Kernel Event Tracing)</a>
+provides this view by recording timestamped markers and named ranges inside
+the kernel. The agent places range boundaries around the stages it wants to
+inspect, then compares their durations and overlap across warps and CTAs to
+locate long waits or imbalanced work.</p>
+<figure class="interactive-figure">
+  <iframe src="../_static/diagrams/iket-timeline.html" title="An in-kernel timeline with TMA, MMA, and epilogue warps" class="diagram-frame" height="320"></iframe>
+  <figcaption>An illustrative timeline for three warps in one CTA. The MMA warp spends most of its time waiting for tile data; the epilogue stores the result after the last MMA.</figcaption>
+</figure><p>In this timeline, the MMA warp performs each matrix operation quickly but
+waits a long time for the next tile. The load stage is the bottleneck, so the
+agent should investigate why it takes so long.</p>
+</section>
+<section id="hardware-counter-profiling">
+<h2>Hardware Counter Profiling<a class="headerlink" href="#hardware-counter-profiling" title="Link to this heading">#</a></h2>
+<p>A timeline can show that a stage is waiting, but further investigation may be
+needed to identify the cause: memory bandwidth, too few instructions issued,
+or register spills. Hardware profiling provides:</p>
+<ul class="simple">
+<li><p><strong>Hardware counters</strong>, including throughput, occupancy, memory traffic,
+cache hit rates, and warp stall reasons;</p></li>
+<li><p><strong>Metrics associated with code</strong>, showing where sampled stalls and memory
+accesses concentrate;</p></li>
+<li><p><strong>A selected capture scope</strong>, so the agent can inspect the kernel and
+invocation relevant to its hypothesis.</p></li>
+</ul>
+<p>NVIDIA Nsight Compute (NCU) collects these measurements. Its
+<a class="reference external" href="https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html">profiling guide</a>
+describes the metric groups and collection methods. The agent uses these
+measurements to test a hypothesis from a timeline. As another example, heavy
+local-memory traffic can lead the agent to inspect register-spill metrics and
+local-memory instructions in the affected code.</p>
+<p>The opening figure illustrates how these views fit together. Timing ranks
+the candidate against a baseline; a timeline locates a wait; hardware
+measurements help investigate its cause. Each result gives the agent evidence
+for a more specific next experiment.</p>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="knowledge.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Knowledge Base for Agents</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="agent-workflows.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Agent Workflows</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#benchmark-server">Benchmark Server</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#in-kernel-event-tracing">In-Kernel Event Tracing</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hardware-counter-profiling">Hardware Counter Profiling</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By TIRx Contributors
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2026, TIRx Contributors.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

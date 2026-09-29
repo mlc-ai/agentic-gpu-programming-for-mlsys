@@ -1,0 +1,698 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" data-theme="auto">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Domain-specific Compiler Analysis &#8212; Agentic GPU Programming for MLSys</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "auto";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "auto";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/book.css?v=fde79067" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=a5fa425f"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'chapters/analysis';</script>
+    <script src="../_static/book-tabs.js?v=3241ad90"></script>
+    <script src="../_static/fold-code.js?v=cc72803f"></script>
+    <link rel="canonical" href="https://mlc.ai/agentic-gpu-programming-for-mlsys/chapters/analysis.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Knowledge Base for Agents" href="knowledge.html" />
+    <link rel="prev" title="Overview" href="overview.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="auto">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/mlc-logo-with-text-landscape.svg" class="logo__image only-light" alt="Agentic GPU Programming for MLSys - Home"/>
+    <script>document.write(`<img src="../_static/mlc-logo-with-text-landscape.svg" class="logo__image only-dark" alt="Agentic GPU Programming for MLSys - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Part I, Elements of Agentic GPU Programming</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Domain-specific Compiler Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="knowledge.html">Knowledge Base for Agents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarking.html">Benchmarking and Profiling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="agent-workflows.html">Agent Workflows</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Part II, TIRx Harness Overview</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="harness.html">Introduction to TIRx Harness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tirx-compiler-foundation.html">TIRx Compiler Foundation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kcoral.html">KCoral Benchmark Server</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Part III, Agentic GPU Programming in Action</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="running-agent-workflows.html">Running Agent Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compiler-analysis-deepdive.html">Compiler Analysis Deep Dive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmark-server-deepdive.html">Benchmark Server Deep Dive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="self-improvement.html">Review and Harness Improvement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced-tips.html">Advanced Tips</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+<a href="https://github.com/mlc-ai/agentic-gpu-programming-for-mlsys" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Domain-specific Compiler Analysis</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#feedback-requirements">Feedback Requirements</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#numerical-correctness-validation">Numerical Correctness Validation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#synchronization-protocol-verification">Synchronization Protocol Verification</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#one-possible-algorithm-state-search">One Possible Algorithm: State Search</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#example-cross-cta-producer-overtaking">Example: Cross-CTA Producer Overtaking</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-race-detection">Data Race Detection</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#one-possible-algorithm-vector-clocks">One Possible Algorithm: Vector Clocks</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#example-a-race-in-tensor-memory">Example: A Race in Tensor Memory</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="domain-specific-compiler-analysis">
+<h1>Domain-specific Compiler Analysis<a class="headerlink" href="#domain-specific-compiler-analysis" title="Link to this heading">#</a></h1>
+<p>Suppose an agent encounters a flaky hang while optimizing a GPU kernel.
+A timeout gives little indication of which operation is blocked or why, so
+repeated runs can consume the agent’s debugging budget without helping it
+locate the cause. The agent needs feedback that points to the relevant parts
+of the program and helps it understand the failure.</p>
+<p>Domain-specific compiler analysis uses the compiler’s representation of
+operations, layouts, and synchronization to examine how a kernel computes
+values, accesses memory, and coordinates execution. This provides feedback
+that helps the agent investigate failures and assess correctness.</p>
+<figure class="interactive-figure">
+  <iframe src="../_static/diagrams/analysis-overview.html" title="Domain-specific compiler analysis for an agent" class="diagram-frame" height="420"></iframe>
+  <figcaption>Select an analysis to see its inputs and the diagnostic information it returns.</figcaption>
+</figure><p>In this chapter, we will describe how domain-specific compiler analysis
+provides feedback that helps agents investigate failures and check correctness.</p>
+<section id="feedback-requirements">
+<h2>Feedback Requirements<a class="headerlink" href="#feedback-requirements" title="Link to this heading">#</a></h2>
+<p>One optimization task repeats the find–implement–evaluate loop hundreds or
+thousands of times, so correctness feedback for an agent must meet three
+requirements:</p>
+<ul class="simple">
+<li><p><strong>Cheap</strong>: it can run on every iteration, ideally without a GPU.</p></li>
+<li><p><strong>Localizing</strong>: it identifies a mismatched output element or the source
+operations involved in a synchronization error or race.</p></li>
+<li><p><strong>Explicit about scope</strong>: a report must state the assumptions and program
+behaviors it covers. Any check based on concrete execution can draw
+conclusions only for the inputs it tested. When a check cannot finish, it
+must report that it is incomplete rather than treat the result as a pass.</p></li>
+</ul>
+<p>Static analyses reason from the program and its execution model; CPU
+simulation complements them by following concrete inputs. Both can use the
+compiler’s representation of operations, layouts, and source locations to
+return useful diagnostics.
+The algorithms below illustrate possible implementations of these capabilities;
+a compiler harness can provide the same kinds of feedback through other
+analysis algorithms.</p>
+</section>
+<section id="numerical-correctness-validation">
+<h2>Numerical Correctness Validation<a class="headerlink" href="#numerical-correctness-validation" title="Link to this heading">#</a></h2>
+<p>Numerical validation normally means running the kernel on a GPU and comparing
+its outputs with an independently written reference, but a GPU is not always
+available. It may be busy with other work and require queuing. Locating a
+single error often means inserting prints and rerunning many times, and if
+every run waits for a GPU, progress slows dramatically.</p>
+<p>The idea is to let the CPU execute the kernel in place of the GPU. The key is
+<strong>faithfulness</strong>: the simulation must execute what the code actually does,
+not what it is meant to do. Translating the kernel into equivalent array
+operations would already assume the correct indices and layouts, and that is
+exactly where errors hide. A faithful simulation needs to:</p>
+<ul class="simple">
+<li><p><strong>Follow the GPU execution model</strong>, for example keeping a separate value
+for every lane and recording which lanes are active on each branch;</p></li>
+<li><p><strong>Respect instruction semantics</strong>, including rounding, type
+conversion, and data exchange within a warp;</p></li>
+<li><p><strong>Compute addresses from the real layout</strong>, converting logical indices to
+physical bytes, so that different variables pointing to the same storage
+also share it in the simulation.</p></li>
+</ul>
+<p>The simulation can help an agent investigate some memory errors and numerical
+mismatches. During execution, it can report out-of-bounds accesses and reads
+of uninitialized memory. The agent can also compare the simulated outputs
+with an independent reference without running the kernel on a GPU. This
+comparison identifies mismatched elements by output name and logical index,
+with their actual and expected values.</p>
+<p>However, a simulation that executes warps in a fixed order may miss errors
+that arise under other orders. Checking these requires examining both the
+coordination between warps and the ordering of their memory accesses. The
+following sections describe synchronization analysis and race detection for
+these two purposes.</p>
+</section>
+<section id="synchronization-protocol-verification">
+<h2>Synchronization Protocol Verification<a class="headerlink" href="#synchronization-protocol-verification" title="Link to this heading">#</a></h2>
+<p>Warps that share data need rules for when each participant may read or
+overwrite it. A <strong>synchronization protocol</strong> is the set of rules that
+coordinates their work through signals and waits.</p>
+<p>For example, a producer writes a tile and signals that it is ready. The
+consumer waits for this signal before reading the tile, then signals that it
+has finished. Before overwriting the buffer with the next tile, the producer
+must wait for the consumer’s completion signal. Together, these rules define
+a protocol for safely passing data between the producer and consumer.</p>
+<p>A kernel can implement these signals and waits with <strong><code class="docutils literal notranslate"><span class="pre">mbarrier</span></code></strong>, a GPU
+synchronization primitive. In the protocol above, each <code class="docutils literal notranslate"><span class="pre">mbarrier</span></code> records
+signals called arrivals and allows a wait to complete once the required
+arrivals have occurred. One <code class="docutils literal notranslate"><span class="pre">mbarrier</span></code> can track tile readiness and another
+buffer availability. Errors in these signals and waits can break the
+protocol in several ways:</p>
+<ul class="simple">
+<li><p><strong>Arrival count mismatch</strong>: the number of actual arrivals differs from the
+count set at initialization, so a wait never returns.</p></li>
+<li><p><strong>Circular waiting</strong>: two groups of warps each wait for the other to finish
+first, and neither can proceed.</p></li>
+<li><p><strong>Producer overtaking</strong>: the producer announces each new tile without
+waiting for the consumer to finish using the previous one. The buffer can
+be overwritten while the consumer is still using it; a protocol that
+reuses barrier phases can also lose track of which tile is ready.</p></li>
+</ul>
+<p>These errors may occur only under some execution orders. Because the GPU does
+not guarantee the relative speed of warps, rerunning the same kernel can
+change that order and make the failure disappear. Numerical tests therefore
+cannot reliably reproduce the bug, and manual review easily misses such
+interactions in multistage pipelines. Synchronization analysis gives the
+agent a way to find protocol errors by examining possible execution orders.</p>
+<section id="one-possible-algorithm-state-search">
+<h3>One Possible Algorithm: State Search<a class="headerlink" href="#one-possible-algorithm-state-search" title="Link to this heading">#</a></h3>
+<p>Finding such errors requires examining execution orders beyond those
+observed in a GPU test. One possible algorithm extracts a synchronization
+model and searches its possible execution orders:</p>
+<ol class="arabic simple">
+<li><p><strong>Keep only the synchronization.</strong> Record only where each participant is,
+which phase each barrier is in and how many arrivals it still needs, and
+which asynchronous operations have not completed. Together these form a
+state.</p></li>
+<li><p><strong>Turn operations into state transitions.</strong> Define how each operation
+changes the modeled state. An <code class="docutils literal notranslate"><span class="pre">mbarrier</span></code> arrival updates its arrival count
+and may complete a phase. A wait advances the waiting participant only
+after the expected phase has completed.</p></li>
+<li><p><strong>Search all reachable states.</strong> Starting from the initial state, try every
+event that can execute: a state where the program has not finished but
+nothing can advance is a deadlock; a transition the rules forbid is a
+protocol error.</p></li>
+<li><p><strong>Return a counterexample.</strong> Give the agent the execution order that leads
+to the error, with the source locations of the operations involved.</p></li>
+</ol>
+<p>The number of states in a real kernel grows quickly, so the search must also
+merge duplicate states and prune execution orders that differ only in the
+order of independent events.</p>
+<p>The following producer–consumer program illustrates how state search finds
+an execution order that violates the synchronization protocol.</p>
+</section>
+<section id="example-cross-cta-producer-overtaking">
+<h3>Example: Cross-CTA Producer Overtaking<a class="headerlink" href="#example-cross-cta-producer-overtaking" title="Link to this heading">#</a></h3>
+<p>Consider a producer–consumer program with three rounds of signaling and
+waiting. It runs on two cooperative thread arrays (CTAs, or CUDA thread blocks)
+in one cluster. One thread in CTA 1 signals that each round is ready; one
+thread in CTA 0 waits for that signal and records the round’s result.</p>
+<p>CTA 0 owns an <code class="docutils literal notranslate"><span class="pre">mbarrier</span></code> named <code class="docutils literal notranslate"><span class="pre">full</span></code>. This reusable barrier has successive
+phases, each initialized to require one arrival. Each producer arrival
+therefore completes a phase. The consumer waits using alternating parity
+values, 0 and 1, to track the phase it expects. The producer has no wait that
+requires the consumer to observe one phase before it completes the next.</p>
+<p>The pseudocode and state graph below follow this three-round program.
+Barrier initialization and cluster synchronization are already complete;
+timing delays are omitted. The graph branches wherever either participant
+can advance.</p>
+<figure class="interactive-figure">
+  <iframe src="../_static/diagrams/state-search.html" title="State search for the three-round cross-CTA example" class="diagram-frame" height="720"></iframe>
+  <figcaption>Select a completing path or a counterexample through the three-round program. Transition labels refer to the pseudocode lines.</figcaption>
+</figure><p>Adding a delay before each consumer wait lets the producer run ahead,
+exposing the missing coordination. The producer can complete
+phases 0 and 1 before the consumer observes phase 0, returning the parity to 0. A
+<a class="reference external" href="https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#parallel-synchronization-and-communication-instructions-mbarrier-test-wait-try-wait">PTX parity wait</a>
+can observe only the current or immediately preceding phase, so phase 0 has
+already been missed. The consumer can then get stuck in a later wait after
+the producer has finished all its arrivals.</p>
+<p>In the GPU runs without the consumer delay, the consumer happens to finish
+each wait before the producer’s next arrival. The bug is therefore not
+triggered, and Compute Sanitizer 2026.1’s synccheck, racecheck, and memcheck
+report no errors.</p>
+<p>A synchronization analysis can use state search to explore the failing order
+and report the arrival that overtakes the consumer:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Illustrative diagnostic
+
+Barrier phase reused before consumption
+  barrier: full, owned by CTA 0, one arrival per phase
+  producer: CTA 1, line 3, arrival for phase 1
+  consumer: CTA 0, line 6, phase 0 not yet observed
+</pre></div>
+</div>
+</section>
+</section>
+<section id="data-race-detection">
+<h2>Data Race Detection<a class="headerlink" href="#data-race-detection" title="Link to this heading">#</a></h2>
+<p>A kernel can complete its synchronization protocol while two warps access
+shared data without the required ordering.
+Two accesses to the same memory, at least one of them a write, with no
+guaranteed order between them, form a data race. The result then depends on
+which executes first, and is sometimes right and sometimes wrong. Common forms
+include:</p>
+<ul class="simple">
+<li><p><strong>Reusing a buffer too early</strong>: a consumer issues an asynchronous matrix
+operation that reads shared memory and immediately tells the producer that
+it may write, but the operation may not have finished reading, and the
+producer’s next round of data overwrites it.</p></li>
+<li><p><strong>Aliasing</strong>: two differently named variables point to the same storage,
+and a write through one is unordered with a read or write through the other.</p></li>
+<li><p><strong>Protecting the wrong accesses</strong>: a barrier does its job, but it does not
+protect the two accesses that conflict.</p></li>
+</ul>
+<p>Passing numerical tests does not rule out a data race. In the buffer-reuse
+example above, the results are correct when the asynchronous read finishes
+before the producer overwrites the buffer. Changes in load or timing can alter
+this order and expose the error, making the failure intermittent and hard to
+reproduce. Race detection must therefore check whether the program orders
+conflicting accesses, even when the tested execution produces correct values.</p>
+<section id="one-possible-algorithm-vector-clocks">
+<h3>One Possible Algorithm: Vector Clocks<a class="headerlink" href="#one-possible-algorithm-vector-clocks" title="Link to this heading">#</a></h3>
+<p>Detecting a race requires knowing which memory accesses the program orders.
+A data race occurs when two accesses to the same memory location, at least
+one of them a write, have no <strong>happens-before relation</strong> in either direction.
+Here, A <em>happens before</em> B means that A precedes B according to the program’s
+execution and <a class="reference external" href="https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#memory-consistency-model">memory-ordering rules</a>.</p>
+<p>One possible algorithm for tracking this relation uses
+<a class="reference external" href="https://www.cs.williams.edu/~freund/papers/09-pldi.pdf#page=3">vector clocks</a>.
+The analysis treats each independently progressing participant, such as a
+warp, as an executor. It numbers each executor’s modeled events, such as
+memory accesses and synchronization operations, in order: 1, 2, 3, and so on.
+For each executor, the analysis keeps a vector clock: its local view of how
+far each executor has progressed, with one counter per executor. These views
+can differ because an executor learns about others’ progress through
+synchronization, not simply because they have run ahead.</p>
+<p>For example, consider warp 3 and warp 7 after their common setup.
+Each has a separate clock with entries <code class="docutils literal notranslate"><span class="pre">[W3,W7]</span></code>. Warp 7’s clock <code class="docutils literal notranslate"><span class="pre">[2,3]</span></code>
+records its own third event and that warp 3’s first two events happen before
+it. Warp 3 may already have reached event 5; until synchronization communicates
+that progress, warp 7’s view of warp 3 remains at 2.</p>
+<p>To detect races, the analysis saves the clock at each memory access. Access A
+happens before B when every entry in A’s clock is less than or equal to the
+corresponding entry in B’s, with at least one strictly smaller. If neither
+clock is ordered before the other this way, the accesses are unordered.
+Such unordered accesses form a data race when they touch the same location
+and at least one writes.</p>
+<p>The analysis maintains these clocks with two rules:</p>
+<ol class="arabic simple">
+<li><p><strong>Advance locally.</strong> At each modeled event, update that executor’s clock
+by incrementing its own entry. Entries for other executors in this same
+clock remain unchanged: another warp running ahead does not by itself
+establish a happens-before relation.</p></li>
+<li><p><strong>Merge at synchronization.</strong> When synchronization establishes an ordering
+from one executor to another, merge the sender’s clock into the receiver’s
+by taking the maximum of each pair of entries, then increment the
+receiver’s own entry. The maximum preserves the latest known event from
+each executor, including events the sender learned about through earlier
+synchronization.</p></li>
+</ol>
+<p>Which operations establish order, and for which executors, is determined by
+the target hardware’s memory model. On new hardware, the algorithm can stay the
+same, but these rules must be rebuilt and checked against real devices with
+small tests.</p>
+</section>
+<section id="example-a-race-in-tensor-memory">
+<h3>Example: A Race in Tensor Memory<a class="headerlink" href="#example-a-race-in-tensor-memory" title="Link to this heading">#</a></h3>
+<p>Waiting for a warp’s own operations does not establish that another warp’s
+data is ready.
+In the <a class="reference download internal" download="" href="../_downloads/6fc75687074d850e12b22e3f5bae0f8e/tmem_race.py"><code class="xref download docutils literal notranslate"><span class="pre">TMEM</span> <span class="pre">example</span> <span class="pre">kernel</span></code></a>,
+one CTA contains two warpgroups of four warps each. Warpgroup 0 stores a
+128-by-32 tile of uint32 values in tensor memory (TMEM); warpgroup 1 loads the
+same tile and writes it to global memory. Both groups compute the same row
+indices; <code class="docutils literal notranslate"><span class="pre">lane</span></code> ranges from 0 to 31 within each warp. In the pseudocode below,
+<code class="docutils literal notranslate"><span class="pre">values</span></code> holds 32 input elements for each producer thread.</p>
+<p>The vector-clock illustration follows one conflicting pair: warp 3 in
+warpgroup 0 and warp 7 in warpgroup 1 both access rows 96..127. It shows their
+two clock entries as <code class="docutils literal notranslate"><span class="pre">[W3,W7]</span></code>, starting at a common baseline after setup.</p>
+<figure class="interactive-figure">
+  <iframe src="../_static/diagrams/race-happens-before.html" title="Vector clocks for the TMEM example kernel" class="diagram-frame" height="760"></iframe>
+  <figcaption>Follow the example kernel's store and load, inspect their synchronization, and compare their vector clocks. The values illustrate one possible analysis.</figcaption>
+</figure><p>The <a class="reference external" href="https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#tcgen05-instructions-tcgen05-wait">PTX waits</a>
+represented by <code class="docutils literal notranslate"><span class="pre">wait_own_stores()</span></code> and <code class="docutils literal notranslate"><span class="pre">wait_own_loads()</span></code> track the completion
+of each issuing thread’s own operations. The consumer does not wait for the
+producer’s stores, so it can read the tile before those stores complete.
+Setup synchronization occurs before both accesses, and cleanup synchronization
+after both; neither orders the store before the load.</p>
+<p>In the recorded runs, the consumer reads incorrect values from TMEM, yet
+Compute Sanitizer 2026.1’s
+<a class="reference external" href="https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html#racecheck-tool">racecheck</a>
+reports <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">hazards</span></code>. Racecheck detects hazards in shared memory; tensor memory
+is a separate memory space, so this conflicting TMEM load and store fall
+outside its coverage. A race detector that models TMEM accesses can identify
+the overlapping load and store and the missing ordering between them:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Illustrative diagnostic
+
+Unordered read/write in TMEM allocation "tile"
+  write: line 4, warp 3 (warpgroup 0), rows 96..127, columns 0..31
+  read:  line 7, warp 7 (warpgroup 1), rows 96..127, columns 0..31
+  ordering: no synchronization edge between the groups' accesses
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="overview.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Overview</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="knowledge.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Knowledge Base for Agents</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#feedback-requirements">Feedback Requirements</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#numerical-correctness-validation">Numerical Correctness Validation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#synchronization-protocol-verification">Synchronization Protocol Verification</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#one-possible-algorithm-state-search">One Possible Algorithm: State Search</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#example-cross-cta-producer-overtaking">Example: Cross-CTA Producer Overtaking</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-race-detection">Data Race Detection</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#one-possible-algorithm-vector-clocks">One Possible Algorithm: Vector Clocks</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#example-a-race-in-tensor-memory">Example: A Race in Tensor Memory</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By TIRx Contributors
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2026, TIRx Contributors.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

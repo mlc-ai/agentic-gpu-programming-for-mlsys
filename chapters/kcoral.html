@@ -1,0 +1,598 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" data-theme="auto">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>KCoral Benchmark Server &#8212; Agentic GPU Programming for MLSys</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "auto";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "auto";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/book.css?v=fde79067" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=a5fa425f"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'chapters/kcoral';</script>
+    <script src="../_static/book-tabs.js?v=3241ad90"></script>
+    <script src="../_static/fold-code.js?v=cc72803f"></script>
+    <link rel="canonical" href="https://mlc.ai/agentic-gpu-programming-for-mlsys/chapters/kcoral.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Running Agent Workflows" href="running-agent-workflows.html" />
+    <link rel="prev" title="TIRx Compiler Foundation" href="tirx-compiler-foundation.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="auto">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/mlc-logo-with-text-landscape.svg" class="logo__image only-light" alt="Agentic GPU Programming for MLSys - Home"/>
+    <script>document.write(`<img src="../_static/mlc-logo-with-text-landscape.svg" class="logo__image only-dark" alt="Agentic GPU Programming for MLSys - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Part I, Elements of Agentic GPU Programming</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">Domain-specific Compiler Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="knowledge.html">Knowledge Base for Agents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarking.html">Benchmarking and Profiling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="agent-workflows.html">Agent Workflows</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Part II, TIRx Harness Overview</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="harness.html">Introduction to TIRx Harness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tirx-compiler-foundation.html">TIRx Compiler Foundation</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">KCoral Benchmark Server</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Part III, Agentic GPU Programming in Action</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="running-agent-workflows.html">Running Agent Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compiler-analysis-deepdive.html">Compiler Analysis Deep Dive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmark-server-deepdive.html">Benchmark Server Deep Dive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="self-improvement.html">Review and Harness Improvement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced-tips.html">Advanced Tips</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+<a href="https://github.com/mlc-ai/agentic-gpu-programming-for-mlsys" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>KCoral Benchmark Server</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#a-small-general-execution-interface">A Small, General Execution Interface</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#self-contained-experiments">Self-Contained Experiments</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#coordinated-gpu-access">Coordinated GPU Access</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#isolated-files-and-process-state">Isolated Files and Process State</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#one-endpoint-for-multiple-gpu-hosts">One Endpoint for Multiple GPU Hosts</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#integrating-benchmarking-profiling-and-diagnostics">Integrating Benchmarking, Profiling, and Diagnostics</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="kcoral-benchmark-server">
+<h1>KCoral Benchmark Server<a class="headerlink" href="#kcoral-benchmark-server" title="Link to this heading">#</a></h1>
+<p>The previous chapter showed how to express and inspect a kernel. Determining
+whether a candidate is correct and fast also requires measurements on the
+target GPU. When several agents share a device, those
+measurements require coordinated access and separation between experiments.
+KCoral, the GPU evaluation service used by TIRx Harness, provides this shared
+environment for correctness tests, benchmarks, and profiling captures.</p>
+<figure class="interactive-figure">
+  <iframe src="../_static/diagrams/kcoral.html" title="KCoral components and deployment" class="diagram-frame" height="430"></iframe>
+  <figcaption>Select a component to inspect its role.</figcaption>
+</figure><p>KCoral separates the development environment from the machine hosting the
+target GPU. Its server manages worker processes and GPU access; evaluation
+code defines the input cases, correctness checks, and timing procedure.
+The same service supports different kernel benchmarks and diagnostic tools
+without embedding their evaluation rules in the server.</p>
+<p>In this chapter, we will describe KCoral’s execution interface through a
+small experiment, then examine how the service coordinates GPU access,
+isolates experiments, and supports benchmarking and profiling tools.</p>
+<section id="a-small-general-execution-interface">
+<h2>A Small, General Execution Interface<a class="headerlink" href="#a-small-general-execution-interface" title="Link to this heading">#</a></h2>
+<p>A remote experiment needs to specify what to execute and which results to
+bring back. KCoral represents it as a program: an ordered sequence of
+instructions describing its code, inputs, operations, and selected outputs.
+A program can contain literal arguments and references to values produced
+by earlier instructions. Four core operations describe this execution model:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Core operation</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">upload</span></code></p></td>
+<td><p>Supply code, tensors, bytes, compiled libraries, or files.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">get_function</span></code></p></td>
+<td><p>Select a named function or object from a module or library.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">run</span></code></p></td>
+<td><p>Call a function using supplied inputs or earlier results.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">return</span></code></p></td>
+<td><p>Select values or filesystem artifacts to return.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The Python client exposes <code class="docutils literal notranslate"><span class="pre">Program</span></code> for describing an experiment and <code class="docutils literal notranslate"><span class="pre">Client</span></code>
+for access to the service, with helpers for operations such as uploading
+folders and returning files. The same execution model accommodates benchmark
+results, profiling reports, and diagnostic artifacts.</p>
+<p>The example below composes these operations into a program that checks and
+times an elementwise GPU addition. <code class="docutils literal notranslate"><span class="pre">KCORAL_URL</span></code> is the address of a running
+KCoral service with PyTorch and <code class="docutils literal notranslate"><span class="pre">cupti-python</span></code> installed for GPU timing.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">kcoral</span><span class="w"> </span><span class="kn">import</span> <span class="n">Client</span><span class="p">,</span> <span class="n">Program</span>
+
+<span class="n">source</span> <span class="o">=</span> <span class="s2">"""</span>
+<span class="s2">import torch</span>
+<span class="s2">from kcoral.builtins import benchmark</span>
+
+<span class="s2">def evaluate(n):</span>
+<span class="s2">    x = torch.arange(n, dtype=torch.float32, device="cuda")</span>
+<span class="s2">    y = torch.empty_like(x)</span>
+
+<span class="s2">    def candidate():</span>
+<span class="s2">        torch.add(x, 1.0, out=y)</span>
+
+<span class="s2">    candidate()</span>
+<span class="s2">    torch.testing.assert_close(y, x + 1.0)</span>
+<span class="s2">    return {"correct": True, "timing": benchmark(candidate)}</span>
+<span class="s2">"""</span>
+
+<span class="n">program</span> <span class="o">=</span> <span class="n">Program</span><span class="p">()</span>
+<span class="n">module</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">upload</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">"module"</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">)</span>
+<span class="n">evaluate</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">get_function</span><span class="p">(</span><span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"evaluate"</span><span class="p">)</span>
+<span class="n">report</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">fn</span><span class="o">=</span><span class="n">evaluate</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="mi">4096</span><span class="p">])</span>
+<span class="n">program</span><span class="o">.</span><span class="n">return_</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s2">"report"</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">report</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">Client</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">"KCORAL_URL"</span><span class="p">])</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">program</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">completed</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">error</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">"report"</span><span class="p">])</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">module</span></code>, <code class="docutils literal notranslate"><span class="pre">evaluate</span></code>, and <code class="docutils literal notranslate"><span class="pre">report</span></code> are references to values that will be
+created on the server. <code class="docutils literal notranslate"><span class="pre">Client.execute</span></code> submits the program; the uploaded
+function defines the check and measurement, and <code class="docutils literal notranslate"><span class="pre">return_</span></code> selects the report
+available in <code class="docutils literal notranslate"><span class="pre">result.results</span></code>.</p>
+</section>
+<section id="self-contained-experiments">
+<h2>Self-Contained Experiments<a class="headerlink" href="#self-contained-experiments" title="Link to this heading">#</a></h2>
+<p>Repeating an experiment should not require reconstructing hidden state left
+by earlier runs. Each program therefore identifies the code and inputs it
+needs, relative to the server’s installed compiler, libraries, and GPU tools. It does not depend on tensors,
+functions, or temporary files left by an earlier execution. This stateless
+interface makes dependencies explicit and allows workers to be replaced
+between experiments.</p>
+<p>An output from one experiment can become an explicit input to another.
+KCoral caches uploaded content to reduce repeated transfers, but this cache
+does not preserve live Python objects or GPU tensors between programs.
+Each program still identifies its required inputs.</p>
+</section>
+<section id="coordinated-gpu-access">
+<h2>Coordinated GPU Access<a class="headerlink" href="#coordinated-gpu-access" title="Link to this heading">#</a></h2>
+<p>Comparing two candidates requires measurements that are not distorted by
+another worker using the same GPU at the same time. KCoral coordinates
+experiments on GPUs dedicated to the service. A GPU lease grants a worker
+exclusive access to a managed device for checks, timings, or profiling. Workers sharing that device take turns, while separate
+devices can support experiments in parallel. Explicitly CPU-only functions
+can run without holding the lease.</p>
+<p>Lease coordination assumes that experiments finish their GPU work before
+releasing the device. It prevents overlapping GPU work by cooperating
+workers; evaluation code still determines the measurement procedure,
+including warmup, repetition, and input selection.</p>
+</section>
+<section id="isolated-files-and-process-state">
+<h2>Isolated Files and Process State<a class="headerlink" href="#isolated-files-and-process-state" title="Link to this heading">#</a></h2>
+<p>Files left by an experiment can affect another experiment’s code or results.
+With filesystem isolation enabled, KCoral uses bubblewrap to give workers a
+private writable workspace and read-only runtime dependencies. Other workers’
+workspaces are hidden. Each execution has a temporary working directory that
+is removed after completion, including handled failures; retained outputs
+are explicit return artifacts.</p>
+<p>Process memory needs a separate boundary. Imported modules, allocations, and
+a CUDA context can persist in a long-lived worker, and a failed kernel can
+leave its context unusable. By default, KCoral replaces the worker after each
+program, giving the next experiment a fresh Python process and CUDA context.
+Workspace isolation and process replacement address these two sources of
+state independently.</p>
+</section>
+<section id="one-endpoint-for-multiple-gpu-hosts">
+<h2>One Endpoint for Multiple GPU Hosts<a class="headerlink" href="#one-endpoint-for-multiple-gpu-hosts" title="Link to this heading">#</a></h2>
+<p>As evaluation expands to several GPU hosts, clients need a way to submit
+experiments without choosing a host themselves. KCoral’s optional router
+provides one service address for multiple GPU hosts, each running a KCoral
+server. The router manages admission and selects
+available nodes; each server manages its own workers and GPU leases.
+Development tools use the same execution interface without tracking
+individual host addresses and availability.</p>
+</section>
+<section id="integrating-benchmarking-profiling-and-diagnostics">
+<h2>Integrating Benchmarking, Profiling, and Diagnostics<a class="headerlink" href="#integrating-benchmarking-profiling-and-diagnostics" title="Link to this heading">#</a></h2>
+<p>To understand a kernel’s behavior and identify further optimization
+opportunities, an agent needs the outputs of GPU tools as well as a timing
+number. Those tools have their own launch options
+and output formats. TIRx Harness connects them to KCoral with
+command-line adapters. Each adapter packages the required code and inputs,
+configures the tool in the server’s installed environment, and exposes its
+output and exit status locally. For tools that produce files, the adapter
+also retrieves the selected artifacts:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Adapter</p></th>
+<th class="head"><p>Responsibility</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">kcoral_python.py</span></code></p></td>
+<td><p>Run a user-supplied Python script, command, or module for custom tests and experiments; return standard output, standard error, and exit status.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">kcoral_iket.py</span></code></p></td>
+<td><p>Capture In-Kernel Event Tracing (IKET) timelines and save traces and retained intermediates locally.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">kcoral_ncu.py</span></code></p></td>
+<td><p>Capture a Nsight Compute (NCU) hardware report for local inspection.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">kcoral_compute_sanitizer.py</span></code></p></td>
+<td><p>Run Compute Sanitizer and retrieve selected diagnostic files.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">kcoral_remote.py</span></code></p></td>
+<td><p>Evaluate a baseline or candidate using a packaged workload’s predefined correctness checks and timing procedure; return benchmark results.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The adapters handle the integration, while KCoral supplies GPU coordination
+and experiment isolation. The experiment still provides the kernel, input
+setup, and any required instrumentation, such as IKET’s named stage markers.
+Timelines, hardware reports, and sanitizer findings are diagnostic evidence;
+ordinary benchmarks establish performance comparisons because profiling
+and instrumentation can affect execution costs.</p>
+<p>Together, the compiler foundation and KCoral connect source changes to GPU
+results: the agent can express a candidate, submit an experiment, and inspect
+the returned measurements and artifacts. Part III begins with a
+<a class="reference internal" href="running-agent-workflows.html"><span class="std std-doc">running optimization workflow</span></a> that uses these capabilities,
+then examines the analysis and benchmark feedback in more detail.</p>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="tirx-compiler-foundation.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">TIRx Compiler Foundation</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="running-agent-workflows.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Running Agent Workflows</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#a-small-general-execution-interface">A Small, General Execution Interface</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#self-contained-experiments">Self-Contained Experiments</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#coordinated-gpu-access">Coordinated GPU Access</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#isolated-files-and-process-state">Isolated Files and Process State</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#one-endpoint-for-multiple-gpu-hosts">One Endpoint for Multiple GPU Hosts</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#integrating-benchmarking-profiling-and-diagnostics">Integrating Benchmarking, Profiling, and Diagnostics</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By TIRx Contributors
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2026, TIRx Contributors.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Domain-specific compiler analysis for an agent</title>
+<link rel="stylesheet" href="diagrams.css">
+<link rel="stylesheet" href="overview.css">
+<script src="diagrams.js" defer></script>
+
+</head>
+<body>
+<main data-selection>
+  <div class="overview">
+    <button class="agent" data-select="agent" data-node="agent" data-highlights="numerics synchronization races input output" aria-pressed="false" aria-controls="agent">
+      <strong>Agent</strong>
+      <span class="cycle" aria-hidden="true">⟳</span>
+      <small>Submit · inspect</small>
+    </button>
+    <div class="links">
+      <div class="link input" data-node="input">Kernel + inputs</div>
+      <div class="link output" data-node="output">Diagnostics</div>
+    </div>
+    <section class="resource-group" aria-label="Domain-specific compiler analysis">
+      <header>Domain-specific compiler analysis</header>
+      <div class="source-grid">
+        <button class="source" data-select="numerics" data-node="numerics" data-highlights="agent input output" aria-pressed="false" aria-controls="numerics">
+          <strong>Numerical<br>correctness</strong><small>Simulate on CPU</small>
+        </button>
+        <button class="source" data-select="synchronization" data-node="synchronization" data-highlights="agent input output" aria-pressed="false" aria-controls="synchronization">
+          <strong>Synchronization<br>protocol</strong><small>Search possible orders</small>
+        </button>
+        <button class="source" data-select="races" data-node="races" data-highlights="agent input output" aria-pressed="false" aria-controls="races">
+          <strong>Data<br>races</strong><small>Check happens-before</small>
+        </button>
+      </div>
+      <p class="support">Possible analysis algorithms</p>
+      <button class="foundation" data-select="foundation" data-highlights="numerics synchronization races" aria-pressed="false" aria-controls="foundation">
+        <strong>Minimal compiler foundation</strong>
+        <small>Operations · layouts · synchronization · source locations</small>
+      </button>
+    </section>
+  </div>
+  <div class="detail" aria-live="polite">
+    <section id="overview" data-panel="overview">
+      <h2>Program in, actionable feedback out</h2>
+      <p>The agent submits a kernel and the parameters or inputs a check needs. Numerical comparisons identify mismatched outputs; synchronization and race diagnostics identify source operations and the ordering problems between them.</p>
+    </section>
+    <section id="agent" data-panel="agent" hidden>
+      <h2>Understand the candidate's failure</h2>
+      <p>The agent inspects numerical differences or reported source operations and ordering relationships to investigate the failure. Each result states the inputs or assumptions it covers.</p>
+    </section>
+    <section id="numerics" data-panel="numerics" hidden>
+      <h2>Validate numerical behavior on CPU</h2>
+      <p><strong>In:</strong> kernel, concrete inputs, and independent reference output. <strong>Out:</strong> mismatched output name, logical index, actual value, and expected value. The agent can reproduce numerical errors and check changes without a GPU.</p>
+    </section>
+    <section id="synchronization" data-panel="synchronization" hidden>
+      <h2>Explain a failed synchronization protocol</h2>
+      <p><strong>In:</strong> participants and synchronization operations. <strong>Out:</strong> a possible execution order leading to deadlock or a protocol error, with the barrier phases and source locations involved.</p>
+    </section>
+    <section id="races" data-panel="races" hidden>
+      <h2>Identify conflicting memory accesses</h2>
+      <p><strong>In:</strong> memory accesses and their ordering. <strong>Out:</strong> conflicting source locations, overlapping bytes, and a missing happens-before relation between the accesses.</p>
+    </section>
+    <section id="foundation" data-panel="foundation" hidden>
+      <h2>Give analyses a common program model</h2>
+      <p>The compiler representation exposes thread roles, memory layouts, and synchronization semantics. Source locations connect each finding to the code the agent can inspect.</p>
+    </section>
+    <button class="reset" data-select="overview" aria-pressed="true" aria-controls="overview">Clear selection</button>
+  </div>
+</main>
+</body>
+</html>

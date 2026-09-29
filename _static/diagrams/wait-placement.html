@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Move the wait, keep the dependency</title>
+<link rel="stylesheet" href="diagrams.css">
+<script src="diagrams.js" defer></script>
+<style>
+  h2 { margin: 0 0 5px; font-size: 18px; }
+  .subtitle { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+  .schedule + .schedule { margin-top: 18px; }
+  .schedule h3 { margin: 0 0 2px; font-size: 14px; }
+  .schedule .note { color: var(--muted); font-size: 12px; margin-bottom: 10px; }
+  .lane { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 12px; align-items: center; margin-bottom: 10px; }
+  .lane-name { font-size: 13px; font-weight: 600; }
+  .ranges { position: relative; display: grid; grid-template-columns: repeat(70, minmax(0, 1fr)); min-height: 34px; }
+  .range { display: flex; align-items: center; justify-content: center; min-width: 0; border: 1px solid var(--border); border-radius: 4px; font-size: 12px; text-align: center; line-height: 1.2; }
+  .load { background: var(--green-bg); }
+  .ind { background: var(--purple-bg); }
+  .use { background: var(--blue-bg); }
+  .wait { background: repeating-linear-gradient(125deg, transparent 0 6px, rgb(180 130 50 / 16%) 6px 8px), var(--amber-bg); }
+  .done { position: absolute; top: -6px; bottom: -50px; left: calc(30 / 70 * 100%); border-left: 1px dashed var(--muted); }
+  .done span { position: absolute; top: -12px; left: 6px; white-space: nowrap; color: var(--muted); font-size: 11px; }
+  .axis { position: relative; margin-left: 122px; padding-top: 7px; border-top: 1px solid var(--muted); text-align: right; color: var(--muted); font-size: 12px; }
+  .axis::after { content: ''; position: absolute; right: -1px; top: -4px; border-left: 7px solid var(--muted); border-top: 3px solid transparent; border-bottom: 3px solid transparent; }
+  .legend { margin-top: 12px; }
+  @media (max-width: 560px) {
+    .lane { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+    .axis { margin-left: 0; }
+    .range { font-size: 10px; }
+  }
+</style>
+</head>
+<body>
+<main data-selection>
+  <h2>Move the wait, keep the dependency</h2>
+  <p class="subtitle">The load is already issued. The agent changes what the consumer does before waiting.</p>
+  <div class="controls" aria-label="Schedule">
+    <button data-select="both" aria-pressed="true">Compare</button>
+    <button data-select="before" aria-pressed="false">Before</button>
+    <button data-select="after" aria-pressed="false">After</button>
+  </div>
+  <div data-show="both before">
+    <section class="schedule">
+      <h3>Before</h3>
+      <p class="note">Wait immediately</p>
+      <div class="lane"><span class="lane-name">TMA engine</span>
+        <div class="ranges"><span class="range load" style="grid-column: 1 / span 30">Load operand tile</span><span class="done"><span>Load complete</span></span></div></div>
+      <div class="lane"><span class="lane-name">Consumer warp</span>
+        <div class="ranges"><span class="range wait" style="grid-column: 1 / span 30">wait</span><span class="range ind" style="grid-column: 31 / span 19">Independent work</span><span class="range use" style="grid-column: 50 / span 14">Consume tile</span></div></div>
+      <div class="axis">time</div>
+    </section>
+  </div>
+  <div data-show="both after">
+    <section class="schedule">
+      <h3>After</h3>
+      <p class="note">Do independent work before waiting: same work, earlier finish</p>
+      <div class="lane"><span class="lane-name">TMA engine</span>
+        <div class="ranges"><span class="range load" style="grid-column: 1 / span 30">Load operand tile</span><span class="done"><span>Load complete</span></span></div></div>
+      <div class="lane"><span class="lane-name">Consumer warp</span>
+        <div class="ranges"><span class="range ind" style="grid-column: 1 / span 19">Independent work</span><span class="range wait" style="grid-column: 20 / span 11">wait</span><span class="range use" style="grid-column: 31 / span 14">Consume tile</span></div></div>
+      <div class="axis">time</div>
+    </section>
+  </div>
+  <p class="legend">Same time scale in both schedules; durations are illustrative.</p>
+</main>
+<script>
+  /* A schedule may belong to several selections (data-show="both before"). */
+  document.addEventListener('DOMContentLoaded', function () {
+    function show(key) {
+      document.querySelectorAll('[data-show]').forEach(function (part) {
+        part.hidden = part.dataset.show.split(' ').indexOf(key) < 0;
+      });
+    }
+    document.querySelectorAll('[data-select]').forEach(function (button) {
+      button.addEventListener('click', function () { show(button.dataset.select); });
+    });
+    show('both');
+  });
+</script>
+</body>
+</html>

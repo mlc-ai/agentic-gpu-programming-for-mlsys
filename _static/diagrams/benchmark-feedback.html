@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One command, one remote experiment</title>
+<link rel="stylesheet" href="diagrams.css">
+<script src="diagrams.js" defer></script>
+<style>
+  h2 { margin: 0 0 5px; font-size: 18px; }
+  main > .subtitle { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+  .code pre { white-space: pre; overflow-x: auto; }
+  .advance { height: 24px; color: var(--muted); font-size: 18px; text-align: center; }
+  .band { margin: 0; }
+  .band .script { font-size: 13px; font-weight: 650; color: var(--blue); }
+  .band .who { color: var(--muted); font-size: 12px; }
+  .band p { margin-top: 4px; }
+  .detail { min-height: 0; }
+  .detail h2 { font-size: 14px; }
+</style>
+</head>
+<body>
+<main data-selection>
+  <h2>One command, one remote experiment</h2>
+  <p class="subtitle">Each command sends a script and its inputs to the benchmark server</p>
+  <div class="controls" aria-label="Experiment"><button data-select="check" aria-pressed="true">Check</button><button data-select="bench" aria-pressed="false">Benchmark</button><button data-select="iket" aria-pressed="false">IKET</button><button data-select="ncu" aria-pressed="false">NCU</button></div>
+  <section data-panel="check">
+    <p class="label">Development machine · the agent runs</p>
+    <div class="code"><pre>python evolution/remote/kcoral_python.py --remote http://10.0.2.2:8901 \
+    --send artifacts/gate-in-gram/gputest \
+    -e CASES=256:standard,512:saturated,...,320:corr_saturated \
+    -e H=8 --timeout 600 -- test_small.py</pre></div>
+    <div class="advance" aria-hidden="true">↓</div>
+    <p class="label">GPU host · a worker runs, with the GPU leased</p>
+    <div class="band"><code class="script">test_small.py</code> <span class="who">written by the agent</span><p>Runs the candidate on small shapes for each stress regime, after filling both outputs with NaN, and compares them with an fp64 token-by-token recurrence.</p></div>
+    <div class="advance" aria-hidden="true">↓</div>
+    <p class="label">What comes back</p>
+    <div class="code"><pre>T=256 H=8 standard     output: finite=True rms_ratio=1.4041e-03 ... bad=0.00e+00
+T=256 H=8 standard     state: finite=True rms_ratio=4.5680e-04 ... bad=0.00e+00
+T=512 H=8 saturated    output: finite=True rms_ratio=3.1333e-03 ... bad=0.00e+00
+...</pre></div>
+    <div class="detail"><h2>A quick gate the agent designed for itself</h2><p>Twelve lines with no bad elements before the official benchmark; a hang shows up here as a timeout instead of wasting an official run.</p></div>
+  </section>
+  <section data-panel="bench" hidden>
+    <p class="label">Development machine · the agent runs</p>
+    <div class="code"><pre>python evolution/remote/kcoral_remote.py candidates/kda/forward_b1_t8192_h96 \
+    scratch/gram-swp-c --remote http://10.0.2.2:8901 --timeout 1500</pre></div>
+    <div class="advance" aria-hidden="true">↓</div>
+    <p class="label">GPU host · a worker runs, with the GPU leased</p>
+    <div class="band"><code class="script">task evaluator</code> <span class="who">supplied by the task</span><p>Owns the inputs, the correctness checks on ten workloads, the private holdout, and the timing method. The baseline is timed in the same request.</p></div>
+    <div class="advance" aria-hidden="true">↓</div>
+    <p class="label">What comes back</p>
+    <div class="code"><pre>holdout correctness: PASS
+...
+  baseline: 1.050103 ms
+  kernel:   0.453369 ms
+  speedup:  2.3162x
+...
+  passed: 10/10</pre></div>
+    <div class="detail"><h2>The official score</h2><p>The agent cannot change how it is measured, only what it submits. This run produced the best kernel of the run.</p></div>
+  </section>
+  <section data-panel="iket" hidden>
+    <p class="label">Development machine · the agent runs</p>
+    <div class="code"><pre>python evolution/remote/kcoral_iket.py --remote http://10.0.2.2:8901 --timeout 1200 \
+    --send artifacts/fused96/iket --output-dir artifacts/fused96/iket_out \
+    -e T=2048 -e H=96 -e REPEAT=1 \
+    -- profile --postprocess json -- python capture.py</pre></div>
+    <div class="advance" aria-hidden="true">↓</div>
+    <p class="label">GPU host · a worker runs, with the GPU leased</p>
+    <div class="band"><code class="script">capture.py</code> <span class="who">written by the agent</span><p>Compiles the kernel with IKET range markers and launches it once; the wrapper returns the trace files.</p></div>
+    <div class="advance" aria-hidden="true">↓</div>
+    <p class="label">What comes back</p>
+    <div class="code"><pre>$ python3 artifacts/fused96/iket_analyze.py iket_pid_*.trace.json
+steady-state chunk period (warp13 m-ks start deltas): mean 3.948 us over 96 CTAs, ...
+CTA spans (us): min 129.1 median 131.5 max 133.0</pre></div>
+    <div class="detail"><h2>Summarized locally</h2><p>The trace comes back as files; the agent’s own script turns it into the time per chunk and per stage, without another GPU run.</p></div>
+  </section>
+  <section data-panel="ncu" hidden>
+    <p class="label">Development machine · the agent runs</p>
+    <div class="code"><pre>python evolution/remote/kcoral_ncu.py --remote http://10.0.2.2:8901 \
+    --send candidates/kda/forward_b1_t8192_h96/scratch/profile-overlap-diag-inverse \
+    -o artifacts/overlap-diag-inverse-gram-tail/kda-full.ncu-rep \
+    --set full --launch-count 1 --kernel-name kda_fwd_kernel -- python capture_ncu.py</pre></div>
+    <div class="advance" aria-hidden="true">↓</div>
+    <p class="label">GPU host · a worker runs, with the GPU leased</p>
+    <div class="band"><code class="script">capture_ncu.py</code> <span class="who">written by the agent</span><p>Launches the target kernel once; NCU profiles the launch whose name matches and the wrapper returns the report file.</p></div>
+    <div class="advance" aria-hidden="true">↓</div>
+    <p class="label">What comes back</p>
+    <div class="code"><pre>$ ncu --import kda-full.ncu-rep --page details | rg -i &#x27;Duration|Throughput|...&#x27;
+    Memory Throughput                 %        35.52
+    Duration                         us       135.33
+    Compute (SM) Throughput           %        30.99</pre></div>
+    <div class="detail"><h2>Read as often as needed</h2><p>The report is opened locally with <code>ncu --import</code>; later sessions reread the same file instead of profiling again.</p></div>
+  </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Components of TIRx Harness</title>
+<link rel="stylesheet" href="diagrams.css">
+<link rel="stylesheet" href="overview.css">
+<link rel="stylesheet" href="harness-map.css">
+<script src="diagrams.js" defer></script>
+</head>
+<body>
+<main data-selection>
+  <p class="scroll-hint">Scroll horizontally to explore the full diagram.</p>
+  <div class="diagram-scroll" role="region" aria-label="TIRx Harness architecture; scroll horizontally on small screens" tabindex="0">
+  <!-- Preserve Part I's component geometry; render every label with the shared HTML font. -->
+  <div class="harness-map" role="group" aria-label="TIRx Harness components and their connections">
+    <div class="harness-boundary"><div class="harness-title">TIRx Harness</div></div>
+    <div class="connection retrieve-connection" data-node="retrieve" aria-hidden="true"></div>
+    <div class="connection diagnostics-connection" data-node="diagnostics" aria-hidden="true"></div>
+    <div class="connection execution-connection" data-node="execution" aria-hidden="true"></div>
+    <div class="connection collect-connection" data-node="collect" aria-hidden="true"></div>
+    <span class="route-label retrieve-label">Retrieve</span>
+    <span class="route-label analyze-label">Analyze kernel</span>
+    <span class="route-label diagnostics-label">Diagnostics</span>
+    <span class="route-label execution-label">Run /<br>measure</span>
+    <span class="route-label collect-label">Collect</span>
+    <button class="map-node agent-node" data-select="workflow" data-node="workflow" data-highlights="retrieve diagnostics collect" aria-label="Agent workflow" aria-pressed="false" aria-controls="workflow"><strong>Agent workflow</strong><span class="cycle" aria-hidden="true">⟳</span></button>
+    <button class="map-node knowledge-node" data-select="knowledge" data-node="knowledge" data-highlights="workflow retrieve" aria-pressed="false" aria-controls="knowledge"><strong>Knowledge base</strong><span class="knowledge-parts"><span>TIRx kernel zoo</span><span>Hardware specs<small>PTX / manuals</small></span></span></button>
+    <button class="map-node analysis-node" data-select="analysis" data-node="analysis" data-highlights="workflow diagnostics" aria-pressed="false" aria-controls="analysis"><strong>Domain-specific<br>compiler analysis</strong><span class="analysis-names"><span>Synccheck</span><span>Racecheck</span><span>NumSim</span></span></button>
+    <p class="foundation-note">Supports the components above</p>
+    <button class="map-node foundation-node" data-select="foundation" data-highlights="knowledge analysis benchmark" aria-pressed="false" aria-controls="foundation"><strong>TIRx foundation</strong><small>Minimal, stable IR<br>Extensible to HW primitives</small></button>
+    <button class="map-node benchmark-node" data-select="benchmark" data-node="benchmark" data-highlights="gpus execution" aria-pressed="false" aria-controls="benchmark"><strong>KCoral<br>benchmark server</strong><small>Correctness + performance</small><span class="profiling"><small>Profiling</small>IKET · NCU</span></button>
+    <button class="map-node gpu-node" data-select="gpus" data-node="gpus" data-highlights="benchmark execution" aria-label="GPUs" aria-pressed="false" aria-controls="gpus"><strong>GPUs</strong></button>
+    <button class="map-node improvement-node" data-select="improvement" data-highlights="workflow collect" aria-pressed="false" aria-controls="improvement"><span><strong>Self-improvement</strong><small>Across evolutions</small></span><span>Evolution traces<small>Improve tools</small></span><span>Optimized kernels<small>Grow knowledge</small></span></button>
+  </div>
+  </div>
+  <div class="detail" aria-live="polite">
+    <section id="overview" data-panel="overview"><h2>TIRx Harness: the components from Part I</h2><p>TIRx provides the compiler foundation beneath the knowledge base, program analysis, and GPU evaluation. Select a component to inspect its role.</p></section>
+    <section id="workflow" data-panel="workflow" hidden><h2>Agent workflow: kernel development</h2><p>The agent uses the harness to express kernels, find implementation knowledge, diagnose errors, and obtain GPU measurements.</p></section>
+    <section id="foundation" data-panel="foundation" hidden><h2>TIRx foundation: program representation</h2><p>TIRx provides the program representation used for compilation and analysis. We write kernels through TIRx-lite, a low-level Python interface.</p></section>
+    <section id="knowledge" data-panel="knowledge" hidden><h2>Knowledge base: implementations and hardware references</h2><p>TIRx Harness’s knowledge base includes a kernel zoo with ports from FlashAttention, DeepGEMM, and FlashInfer. Hardware documentation complements these implementations with instruction semantics and requirements.</p></section>
+    <section id="analysis" data-panel="analysis" hidden><h2>Domain-specific compiler analysis: correctness tools</h2><p>TIRx Harness provides NumSim for numerical simulation, Synccheck for synchronization analysis, and Racecheck for data-race analysis. These CPU-based tools inspect supported program behavior and complement tests on the target GPU.</p></section>
+    <section id="benchmark" data-panel="benchmark" hidden><h2>KCoral benchmark server: GPU evaluation</h2><p>KCoral coordinates GPU access for correctness checks, timings, and profiling captures. IKET captures kernel timelines, and Nsight Compute (NCU) supplies hardware measurements. Evaluation code defines checks and timing rules; KCoral provides the managed execution environment.</p></section>
+    <section id="gpus" data-panel="gpus" hidden><h2>GPUs: target hardware</h2><p>The GPUs execute compiled kernels and profiling captures. They can reside on a server or edge device separate from the agent’s development machine.</p></section>
+    <section id="improvement" data-panel="improvement" hidden><h2>Self-improvement across runs</h2><p>Retained traces can reveal gaps in the harness tools, while validated kernels can extend the knowledge base. Part III discusses how to review optimization results for these improvements.</p></section>
+    <button class="reset" data-select="overview" aria-pressed="true" aria-controls="overview">Clear selection</button>
+  </div>
+</main>
+</body>
+</html>

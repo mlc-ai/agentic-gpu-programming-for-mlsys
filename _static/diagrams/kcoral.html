@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KCoral components and deployment</title>
+<link rel="stylesheet" href="diagrams.css">
+<link rel="stylesheet" href="overview.css">
+<script src="diagrams.js" defer></script>
+<style>
+  .deployment { display: grid; grid-template-columns: 1fr 64px 2fr 34px 60px; align-items: center; }
+  .development { padding: 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--agent-fill); }
+  .development h2 { margin: 0 0 9px; font-size: 13px; text-align: center; }
+  .source { width: 100%; padding: 8px 5px; }
+  .source + .source { margin-top: 8px; }
+  .source small { margin-top: 4px; }
+  .links { padding: 0; }
+  .link + .link { margin-top: 12px; }
+  .server-body { padding: 10px; }
+  .worker { border: 1px solid var(--overview-border); border-radius: 7px; padding: 8px; margin-bottom: 9px; }
+  .worker h2 { font-size: 12px; margin: 0 0 7px; text-align: center; color: var(--muted); }
+  .worker-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+  .worker-grid .source { margin: 0; }
+  .worker .source strong { font-size: 12px; }
+  .device-link { font-size: 21px; color: var(--arrow); text-align: center; }
+  .gpu { padding: 12px 3px; border: 1px solid var(--overview-border); border-radius: 7px; background: var(--agent-fill); }
+  .gpu strong, .gpu small { display: block; }
+  .gpu small { font-size: 11px; color: var(--muted); margin-top: 5px; }
+  .detail { min-height: 123px; }
+  @media (max-width: 560px) {
+    .deployment { grid-template-columns: 1fr; gap: 8px; }
+    .development { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    .development h2 { grid-column: 1 / -1; margin-bottom: 0; }
+    .development .source { margin: 0; }
+    .links { padding: 0; }
+    .device-link { line-height: 1; font-size: 0; }
+    .device-link::after { content: "↕"; font-size: 21px; }
+    .gpu { padding: 7px; }
+    .gpu strong, .gpu small { display: inline; margin: 0 3px; }
+    .source strong { font-size: 12px; }
+    .detail { min-height: 158px; }
+  }
+</style>
+</head>
+<body>
+<main data-selection>
+  <div class="deployment">
+    <section class="development" aria-label="Development environment">
+      <h2>Development environment</h2>
+      <button class="source" data-select="program" aria-pressed="false" aria-controls="program"><strong>Experiment program</strong><small>Code · inputs · outputs</small></button>
+      <button class="source" data-select="adapters" aria-pressed="false" aria-controls="adapters"><strong>Tool adapters</strong><small>Python · IKET · NCU<br>Compute Sanitizer</small></button>
+    </section>
+    <div class="links">
+      <div class="link input">Program</div>
+      <div class="link output">Results &amp;<br>artifacts</div>
+    </div>
+    <section class="resource-group" aria-label="KCoral server">
+      <header>KCoral server</header>
+      <div class="server-body">
+        <section class="worker" aria-label="Worker process">
+          <h2>Worker process</h2>
+          <div class="worker-grid">
+            <button class="source" data-select="workspace" aria-pressed="false" aria-controls="workspace"><strong>Private workspace</strong><small>Code &amp; generated files</small></button>
+            <button class="source" data-select="process" aria-pressed="false" aria-controls="process"><strong>Fresh process state</strong><small>Python &amp; CUDA context</small></button>
+          </div>
+        </section>
+        <button class="source" data-select="lease" aria-pressed="false" aria-controls="lease"><strong>GPU coordination</strong><small>Exclusive access through a lease</small></button>
+      </div>
+    </section>
+    <div class="device-link" aria-label="Managed GPU access">↔</div>
+    <button class="gpu" data-select="gpu" aria-pressed="false" aria-controls="gpu"><strong>GPU</strong><small>Managed device</small></button>
+  </div>
+  <div class="detail" aria-live="polite">
+    <section id="overview" data-panel="overview"><h2>KCoral: experiment and resource boundaries</h2><p>A self-contained program describes the experiment. KCoral separates worker files and process state and coordinates GPU access. Select a component to inspect its design; the selected box is highlighted.</p></section>
+    <section id="program" data-panel="program" hidden><h2>Experiment program: explicit dependencies</h2><p>Upload, function lookup, execution, and return are the core operations. A program supplies its code and inputs relative to installed software, without relying on objects left by a previous experiment. Upload caching reduces transfers, not these dependency requirements.</p></section>
+    <section id="workspace" data-panel="workspace" hidden><h2>Private workspace: isolated files</h2><p>With filesystem isolation enabled, a worker has private writable storage and read-only runtime dependencies. Temporary experiment files are cleaned up; outputs to retain are explicit return artifacts.</p></section>
+    <section id="process" data-panel="process" hidden><h2>Fresh process state: independent experiments</h2><p>By default, KCoral replaces the worker after each program. The next experiment starts with a fresh Python process and CUDA context, separately from filesystem cleanup.</p></section>
+    <section id="lease" data-panel="lease" hidden><h2>GPU coordination: exclusive access</h2><p>A lease gives a worker exclusive access to a managed GPU. Cooperating workers take turns and finish their GPU work before releasing the device. Explicitly CPU-only functions can run without holding the lease.</p></section>
+    <section id="gpu" data-panel="gpu" hidden><h2>GPU: access through KCoral</h2><p>The GPUs are visible only to the KCoral server, which manages access to them. The development environment has no direct GPU access; it uses KCoral for correctness checks, benchmarks, and profiling.</p></section>
+    <section id="adapters" data-panel="adapters" hidden><h2>Tool adapters: bridge to GPU diagnostics</h2><p>The adapters package inputs and configure Python, IKET, NCU, or Compute Sanitizer in the remote environment. They expose tool output and status and retrieve selected profiling or diagnostic artifacts.</p></section>
+    <button class="reset" data-select="overview" aria-pressed="true" aria-controls="overview">Clear selection</button>
+  </div>
+</main>
+</body>
+</html>

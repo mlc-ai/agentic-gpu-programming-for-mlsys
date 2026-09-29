@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A knowledge base for an agent</title>
+<link rel="stylesheet" href="diagrams.css">
+<link rel="stylesheet" href="overview.css">
+<script src="diagrams.js" defer></script>
+<style>
+  .agent strong { font-size: 19px; }
+  .resource-group header { font-size: 20px; }
+  .source-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); padding-bottom: 14px; }
+  .source { min-height: 108px; }
+  .source strong { font-size: 16px; }
+  .source small { font-size: 11px; }
+  .detail h2 { font-size: 16px; }
+  @media (max-width: 560px) {
+    .agent strong { font-size: 17px; }
+    .resource-group header { font-size: 18px; }
+    .source-grid { padding-bottom: 10px; }
+    .source { min-height: 95px; }
+    .source strong { font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+<main data-selection>
+  <div class="overview">
+    <button class="agent" data-select="agent" data-node="agent" data-highlights="kernels hardware input output" aria-pressed="false" aria-controls="agent">
+      <strong>Agent</strong>
+      <span class="cycle" aria-hidden="true">⟳</span>
+      <small>Find · adapt</small>
+    </button>
+    <div class="links">
+      <div class="link input" data-node="input">Retrieve</div>
+      <div class="link output" data-node="output">Knowledge</div>
+    </div>
+    <section class="resource-group" aria-label="Knowledge base">
+      <header>Knowledge base</header>
+      <div class="source-grid">
+        <button class="source" data-select="kernels" data-node="kernels" data-highlights="agent input output" aria-pressed="false" aria-controls="kernels">
+          <strong>Kernel zoo</strong>
+          <small>Ported kernels<br>Agent-developed kernels</small>
+        </button>
+        <button class="source" data-select="hardware" data-node="hardware" data-highlights="agent input output" aria-pressed="false" aria-controls="hardware">
+          <strong>Hardware &amp; ISA<br>documentation</strong>
+          <small>Instructions · memory<br>Synchronization</small>
+        </button>
+      </div>
+    </section>
+  </div>
+  <div class="detail" aria-live="polite">
+    <section id="overview" data-panel="overview">
+      <h2>Find knowledge for an optimization</h2>
+      <p>The agent retrieves existing implementations and hardware specifications. Together they provide optimization ideas and the conditions needed to apply them.</p>
+    </section>
+    <section id="agent" data-panel="agent" hidden>
+      <h2>Choose and adapt a strategy</h2>
+      <p>The agent connects a problem in its current kernel to a mechanism in the knowledge base, checks where that mechanism applies, and adapts it to the task.</p>
+    </section>
+    <section id="kernels" data-panel="kernels" hidden>
+      <h2>Learn from complete implementations</h2>
+      <p>Ported implementations and kernels developed by agents show how algorithms, layouts, and schedules fit together. A reference can supply a matrix decomposition or a cache policy that the agent adapts to another operator.</p>
+    </section>
+    <section id="hardware" data-panel="hardware" hidden>
+      <h2>Find mechanisms and their conditions</h2>
+      <p>Hardware manuals and ISA documentation describe instructions, memory behavior, cache controls, and synchronization. The agent can find a mechanism for a bottleneck and check its requirements before using it.</p>
+    </section>
+    <button class="reset" data-select="overview" aria-pressed="true" aria-controls="overview">Clear selection</button>
+  </div>
+</main>
+</body>
+</html>

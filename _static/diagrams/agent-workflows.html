@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent workflows composed with a compiler harness</title>
+<link rel="stylesheet" href="diagrams.css">
+<link rel="stylesheet" href="overview.css">
+<script src="diagrams.js" defer></script>
+<style>
+  .workflow-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .workflow-choice { display: flex; flex-direction: column; align-items: center; padding: 10px 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--soft); }
+  .workflow-choice strong { display: block; font-size: 16px; font-weight: 600; }
+  .workflow-choice small { display: block; margin-top: auto; font-size: 12px; color: var(--muted); }
+  .workflow-choice svg { display: block; width: 100%; max-width: 250px; margin: 6px auto 4px; }
+  svg text { fill: var(--text); text-anchor: middle; font-size: 14px; }
+  .stage { fill: var(--agent-fill); stroke: var(--border); stroke-width: 1.5; }
+  .agent-a { fill: var(--blue-bg); stroke: var(--blue); stroke-width: 1.5; }
+  .agent-b { fill: var(--purple-bg); stroke: var(--purple); stroke-width: 1.5; }
+  .edge { fill: none; stroke: var(--arrow); stroke-width: 1.8; }
+  .arrowhead { fill: var(--arrow); }
+  .exchange { display: flex; justify-content: center; gap: 28px; padding: 4px 0; color: var(--arrow); font-size: 12px; }
+  .exchange span { display: flex; align-items: center; gap: 7px; }
+  .exchange b { font-size: 24px; font-weight: 400; }
+  .exchange.active { color: var(--blue); }
+  .harness-node { display: block; width: 100%; padding: 9px; border: 1.5px solid var(--overview-border); border-radius: 8px; background: var(--overview-fill); }
+  .harness-node > strong { display: block; font-size: 20px; font-weight: 650; }
+  button.active { outline: 2px dashed var(--blue); outline-offset: 2px; }
+  .detail { min-height: 0; padding: 9px 12px; }
+  .detail h2 { font-size: 16px; }
+  @media (max-width: 650px) {
+    .workflow-options { grid-template-columns: 1fr; }
+    .exchange { gap: 16px; font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+<main data-selection>
+    <section class="workflow-options" aria-label="Example agent workflows">
+      <button class="workflow-choice" data-select="pipeline" data-node="pipeline" data-highlights="harness exchange" aria-pressed="false" aria-controls="pipeline" aria-label="Fixed pipeline: research, write kernel, profile, propose direction, repeat">
+        <strong>Fixed pipeline</strong>
+        <svg viewBox="0 0 250 140" aria-hidden="true">
+          <defs><marker id="pipeline-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path class="arrowhead" d="M0 0 L10 5 L0 10 Z"/></marker></defs>
+          <path class="edge" d="M111 30 H138" marker-end="url(#pipeline-arrow)"/>
+          <path class="edge" d="M190 53 V86" marker-end="url(#pipeline-arrow)"/>
+          <path class="edge" d="M139 110 H112" marker-end="url(#pipeline-arrow)"/>
+          <path class="edge" d="M60 87 V54" marker-end="url(#pipeline-arrow)"/>
+          <rect class="stage" x="10" y="8" width="100" height="44" rx="7"/>
+          <text x="60" y="35">Research</text>
+          <rect class="stage" x="140" y="8" width="100" height="44" rx="7"/>
+          <text x="190" y="25">Write<tspan x="190" dy="17">kernel</tspan></text>
+          <rect class="stage" x="140" y="88" width="100" height="44" rx="7"/>
+          <text x="190" y="115">Profile</text>
+          <rect class="stage" x="10" y="88" width="100" height="44" rx="7"/>
+          <text x="60" y="105">Propose<tspan x="60" dy="17">direction</tspan></text>
+        </svg>
+        <small>Repeat defined stages</small>
+      </button>
+      <button class="workflow-choice" data-select="goal" data-node="goal" data-highlights="harness exchange" aria-pressed="false" aria-controls="goal" aria-label="Goal mode: one agent continues toward the goal across turns">
+        <strong>Goal mode</strong>
+        <svg viewBox="0 0 250 140" aria-hidden="true">
+          <defs><marker id="goal-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path class="arrowhead" d="M0 0 L10 5 L0 10 Z"/></marker></defs>
+          <path class="edge" d="M105 69 C54 -1 196 -1 145 69" marker-end="url(#goal-arrow)"/>
+          <circle class="agent-a" cx="125" cy="94" r="32"/>
+          <text x="125" y="99">Agent</text>
+        </svg>
+        <small>Continue toward the goal</small>
+      </button>
+      <button class="workflow-choice" data-select="flame" data-node="flame" data-highlights="harness exchange" aria-pressed="false" aria-controls="flame" aria-label="Flame Chase: two agents take turns on the same task">
+        <strong>Flame Chase</strong>
+        <svg viewBox="0 0 250 140" aria-hidden="true">
+          <defs><marker id="flame-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path class="arrowhead" d="M0 0 L10 5 L0 10 Z"/></marker></defs>
+          <path class="edge" d="M82 50 C112 14 138 14 168 50" marker-end="url(#flame-arrow)"/>
+          <path class="edge" d="M168 100 C138 136 112 136 82 100" marker-end="url(#flame-arrow)"/>
+          <circle class="agent-a" cx="60" cy="75" r="32"/>
+          <text x="60" y="80">Agent A</text>
+          <circle class="agent-b" cx="190" cy="75" r="32"/>
+          <text x="190" y="80">Agent B</text>
+        </svg>
+        <small>Two agents take turns</small>
+      </button>
+    </section>
+    <div class="exchange" data-node="exchange">
+      <span><b aria-hidden="true">↓</b> Queries &amp; tool calls</span>
+      <span><b aria-hidden="true">↑</b> Knowledge &amp; feedback</span>
+    </div>
+    <button class="harness-node" data-select="harness" data-node="harness" data-highlights="pipeline goal flame exchange" aria-pressed="false" aria-controls="harness">
+      <strong>Compiler harness</strong>
+    </button>
+  <div class="detail" aria-live="polite">
+    <section id="overview" data-panel="overview">
+      <h2>Compose a workflow with a harness</h2>
+      <p>Each workflow coordinates an optimization search. Its agents use the same compiler harness to find knowledge, implement candidates, and obtain correctness and performance feedback.</p>
+    </section>
+    <section id="pipeline" data-panel="pipeline" hidden>
+      <h2>Fixed Pipeline</h2>
+      <p>Research draws on the knowledge base; writing uses the compiler and correctness checks. Profiling a passing candidate supplies evidence for the next optimization direction.</p>
+    </section>
+    <section id="goal" data-panel="goal" hidden>
+      <h2>Goal Mode</h2>
+      <p>The goal keeps an objective active across turns. The agent chooses which harness tools to use next and checks progress against the task's correctness and performance requirements.</p>
+    </section>
+    <section id="flame" data-panel="flame" hidden>
+      <h2>Flame Chase</h2>
+      <p>Two agents take turns in fresh sessions, each reconsidering the work left by the other. The task and files in the repository carry the search forward within a shared run budget.</p>
+    </section>
+    <section id="harness" data-panel="harness" hidden>
+      <h2>Supply capabilities to each workflow</h2>
+      <p>Each workflow's agents call the compiler harness and use its feedback to guide their experiments. Saved candidates and results let the work continue across stages or turns.</p>
+    </section>
+    <button class="reset" data-select="overview" aria-pressed="true" aria-controls="overview">Clear selection</button>
+  </div>
+</main>
+</body>
+</html>

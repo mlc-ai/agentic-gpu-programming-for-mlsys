@@ -1,0 +1,550 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" data-theme="auto">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Introduction to TIRx Harness &#8212; Agentic GPU Programming for MLSys</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "auto";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "auto";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/book.css?v=fde79067" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=a5fa425f"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'chapters/harness';</script>
+    <script src="../_static/book-tabs.js?v=3241ad90"></script>
+    <script src="../_static/fold-code.js?v=cc72803f"></script>
+    <link rel="canonical" href="https://mlc.ai/agentic-gpu-programming-for-mlsys/chapters/harness.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="TIRx Compiler Foundation" href="tirx-compiler-foundation.html" />
+    <link rel="prev" title="Agent Workflows" href="agent-workflows.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="auto">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/mlc-logo-with-text-landscape.svg" class="logo__image only-light" alt="Agentic GPU Programming for MLSys - Home"/>
+    <script>document.write(`<img src="../_static/mlc-logo-with-text-landscape.svg" class="logo__image only-dark" alt="Agentic GPU Programming for MLSys - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Part I, Elements of Agentic GPU Programming</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">Domain-specific Compiler Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="knowledge.html">Knowledge Base for Agents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarking.html">Benchmarking and Profiling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="agent-workflows.html">Agent Workflows</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Part II, TIRx Harness Overview</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Introduction to TIRx Harness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tirx-compiler-foundation.html">TIRx Compiler Foundation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kcoral.html">KCoral Benchmark Server</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Part III, Agentic GPU Programming in Action</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="running-agent-workflows.html">Running Agent Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compiler-analysis-deepdive.html">Compiler Analysis Deep Dive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmark-server-deepdive.html">Benchmark Server Deep Dive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="self-improvement.html">Review and Harness Improvement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced-tips.html">Advanced Tips</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+<a href="https://github.com/mlc-ai/agentic-gpu-programming-for-mlsys" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Introduction to TIRx Harness</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#a-minimal-predictable-compiler-foundation">A Minimal, Predictable Compiler Foundation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#a-knowledge-base-of-implementations-and-hardware-references">A Knowledge Base of Implementations and Hardware References</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#domain-specific-program-analysis">Domain-Specific Program Analysis</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#benchmarking-and-profiling-with-kcoral">Benchmarking and Profiling with KCoral</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#continuing-through-part-ii">Continuing Through Part II</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="introduction-to-tirx-harness">
+<h1>Introduction to TIRx Harness<a class="headerlink" href="#introduction-to-tirx-harness" title="Link to this heading">#</a></h1>
+<p>Part I established the motivation for an agentic compiler harness and its
+components. TIRx Harness brings those components into a concrete system:
+the TIRx compiler foundation, a knowledge base, domain-specific program
+analysis, and benchmarking and profiling through KCoral.</p>
+<figure class="interactive-figure">
+  <iframe src="../_static/diagrams/tirx-harness.html" title="Components of TIRx Harness" class="diagram-frame" height="430"></iframe>
+  <figcaption>The compiler harness from Part I, with its concrete TIRx components. The knowledge base and program analysis sit above the compiler foundation; KCoral connects GPU evaluation and profiling to the target devices. Select a component to inspect its role.</figcaption>
+</figure><p>The figure keeps the component organization from Part I. The TIRx foundation
+represents the kernels that the agent writes and the analysis tools inspect.
+The knowledge base supplies implementations and hardware references. Program
+analysis explains kernel behavior, while KCoral provides GPU access for
+correctness tests, timings, and profiles.</p>
+<p>In this chapter, we will describe the responsibilities of each TIRx Harness
+component and how the components work together.</p>
+<section id="a-minimal-predictable-compiler-foundation">
+<h2>A Minimal, Predictable Compiler Foundation<a class="headerlink" href="#a-minimal-predictable-compiler-foundation" title="Link to this heading">#</a></h2>
+<p>The compiler foundation determines how directly an agent can connect what
+it writes to what the GPU executes. An agent may know the execution strategy
+it wants without knowing which source program will produce it. Compiler
+transformations can also complicate debugging, since a failure may originate
+in either the authored kernel or its compilation.</p>
+<p>TIRx is a domain-specific language and compiler for machine learning kernels.
+It serves as the compiler foundation for the harness. We write kernels through
+TIRx-lite, a low-level Python interface to TIRx that exposes hardware
+instructions, memory addresses, warp roles, and synchronization directly.
+Keeping this interface close to NVIDIA’s PTX instruction set reduces the additional
+semantics an agent must learn; PTX documentation supplies the meaning and
+requirements of the exposed instructions.</p>
+<p>The foundation’s intermediate representation (IR) retains loops, conditionals,
+and buffers so that compilation and analysis can operate on the same structured
+program. The hardware instruction interface also makes new instructions easier
+to expose through small extensions. Support for an instruction includes both
+its compiler lowering and, where available, a model that the analysis tools
+can inspect.</p>
+</section>
+<section id="a-knowledge-base-of-implementations-and-hardware-references">
+<h2>A Knowledge Base of Implementations and Hardware References<a class="headerlink" href="#a-knowledge-base-of-implementations-and-hardware-references" title="Link to this heading">#</a></h2>
+<p>A compiler foundation makes hardware strategies expressible, but an agent
+also needs implementation knowledge. TIRx Harness includes a knowledge base
+of kernel implementations and hardware documentation. Its kernel zoo contains
+concrete TIRx implementations that show how algorithms, layouts, and schedules
+fit together, including ports from established GPU libraries:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Kernel in the zoo</p></th>
+<th class="head"><p>Ported from</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="extlink-kernels reference external" href="https://github.com/mlc-ai/TIRx-kernels/blob/main/tirx_kernels/flashattention/flash_attention4.py">FlashAttention-4 forward</a></p></td>
+<td><p>FlashAttention</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="extlink-kernels reference external" href="https://github.com/mlc-ai/TIRx-kernels/blob/main/tirx_kernels/deepgemm/fp8_gemm_1d1d.py">Dense FP8/FP4 matrix multiplication</a></p></td>
+<td><p>DeepGEMM</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="extlink-kernels reference external" href="https://github.com/mlc-ai/TIRx-kernels/blob/main/tirx_kernels/flashinfer/gdn_prefill/gdn_prefill_sm100.py">Gated DeltaNet prefill</a></p></td>
+<td><p>FlashInfer</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Preserving complete implementations keeps their dataflow, synchronization,
+and workload assumptions available for inspection. This context is easy to
+lose in a short summary of optimization lessons. Kernels in the zoo can
+therefore serve as references for techniques such as pipelined data movement
+or specialized warp roles, even when an agent is implementing a different
+computation.</p>
+<p>TIRx Harness’s knowledge base also includes hardware documentation to
+complement the zoo. The PTX ISA describes instructions and their conditions
+of use, including capabilities that may
+not yet appear in the collection. The zoo provides known implementation
+strategies; the ISA expands the set of hardware mechanisms available for
+new ones.</p>
+</section>
+<section id="domain-specific-program-analysis">
+<h2>Domain-Specific Program Analysis<a class="headerlink" href="#domain-specific-program-analysis" title="Link to this heading">#</a></h2>
+<p>A kernel may pass many GPU tests and still contain a timing-dependent
+synchronization bug or data race. TIRx Harness provides CPU-based simulation
+and program analysis to investigate behavior beyond a pass/fail result:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Tool</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>NumSim</p></td>
+<td><p>Simulate supported operations and expose outputs for comparison with an independent numerical reference.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Synccheck</p></td>
+<td><p>Check synchronization behavior, including deadlocks and barrier protocol violations.</p></td>
+</tr>
+<tr class="row-even"><td><p>Racecheck</p></td>
+<td><p>Detect conflicting memory accesses and missing ordering dependencies.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>These tools inspect the TIRx program with concrete inputs. Their conclusions
+are scoped to the supplied kernel configuration, inputs, and supported
+operations; reports identify unsupported behavior and coverage limits.
+They complement correctness tests on the target GPU.</p>
+</section>
+<section id="benchmarking-and-profiling-with-kcoral">
+<h2>Benchmarking and Profiling with KCoral<a class="headerlink" href="#benchmarking-and-profiling-with-kcoral" title="Link to this heading">#</a></h2>
+<p>Correctness tests, timings, and profiles need a controlled execution
+environment. If several agents share a GPU without coordination, a timing
+change may reflect concurrent activity rather than an improvement in the
+kernel. TIRx Harness uses KCoral, a remote GPU evaluation service, to
+coordinate access to the target devices.</p>
+<p>KCoral provides the execution environment for numerical checks, benchmarks,
+and profiling captures, together with results and diagnostic artifacts.
+For each kernel being optimized, an evaluation program specifies its input
+cases, reference outputs, and timing rules. KCoral supplies the managed GPU
+on which that program runs. This separates the meaning of a measurement
+from the machinery that executes it.</p>
+<p>For performance diagnosis, the harness integrates In-Kernel Event Tracing
+(IKET) and NVIDIA Nsight Compute (NCU). IKET provides timelines of named
+stages across warps and thread blocks, exposing waits and overlap. NCU
+provides hardware measurements such as throughput, occupancy, memory traffic,
+and stalls. These views connect performance problems to specific parts of
+the kernel.</p>
+<p>Separating development from evaluation also allows the target GPU to reside
+on a server or edge device that does not host the coding agent. The same
+harness can provide programming and analysis tools on a workstation while
+using KCoral for measurements on the target hardware.</p>
+</section>
+<section id="continuing-through-part-ii">
+<h2>Continuing Through Part II<a class="headerlink" href="#continuing-through-part-ii" title="Link to this heading">#</a></h2>
+<p>The following chapters develop the programming and execution interfaces of
+this harness:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="tirx-compiler-foundation.html"><span class="std std-doc">TIRx Compiler Foundation</span></a> shows how an agent
+expresses optimization choices in kernel code and inspects the generated
+program, and explains how the instruction interface can be extended.</p></li>
+<li><p><a class="reference internal" href="kcoral.html"><span class="std std-doc">KCoral Benchmark Server</span></a> explains how GPU experiments are
+submitted and executed, how the service coordinates access and isolates
+experiments, and how it returns benchmark and profiling results.</p></li>
+</ul>
+<p>Part III then uses these components together in a Kimi Delta Attention
+optimization task, following the agent from implementation through analysis
+and GPU evaluation.</p>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="agent-workflows.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Agent Workflows</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="tirx-compiler-foundation.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">TIRx Compiler Foundation</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#a-minimal-predictable-compiler-foundation">A Minimal, Predictable Compiler Foundation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#a-knowledge-base-of-implementations-and-hardware-references">A Knowledge Base of Implementations and Hardware References</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#domain-specific-program-analysis">Domain-Specific Program Analysis</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#benchmarking-and-profiling-with-kcoral">Benchmarking and Profiling with KCoral</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#continuing-through-part-ii">Continuing Through Part II</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By TIRx Contributors
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2026, TIRx Contributors.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,83 @@
+/* Match the typography of Modern GPU Programming for MLSys. */
+html {
+  --pst-font-family-base: system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --pst-font-family-heading: var(--pst-font-family-base);
+  --pst-font-family-monospace: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+  --pst-font-size-h1: 2.625rem;
+  --pst-font-size-h2: 2.125rem;
+  --pst-font-size-h6: 1rem;
+  --pst-font-weight-heading: 600;
+}
+html[data-theme="light"] {
+  --pst-color-primary: #176b85;
+  --pst-color-link: #176b85;
+  --pst-color-link-hover: #104b5e;
+}
+html[data-theme="dark"] {
+  --pst-color-primary: #7bc8db;
+  --pst-color-link: #7bc8db;
+  --pst-color-link-hover: #b4e5f0;
+}
+.bd-article-container { max-width: 53rem; }
+.bd-article h2 { margin-top: 2.2rem; }
+.logo__image.only-dark { background: white; padding: 4px 8px; border-radius: 6px; }
+table.docutils th { white-space: normal; }
+.bd-article a { text-underline-offset: 0.18em; }
+.chapter-figure { margin: 1.8rem 0; }
+.chapter-figure > a { display: block; }
+.chapter-figure img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+  border-radius: 8px;
+}
+.chapter-figure figcaption { margin-top: 0.8rem; text-align: left; font-size: 0.88rem; color: var(--pst-color-text-base); }
+.interactive-figure { margin: 1rem 0 1.5rem; }
+.diagram-frame {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--pst-color-border);
+  border-radius: 6px;
+}
+.interactive-figure figcaption {
+  margin-top: 0.6rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--pst-color-text-muted);
+}
+.launch-tabs { margin: 1.25rem 0; }
+.launch-tablist { display: flex; flex-wrap: wrap; gap: 0.3rem; border-bottom: 1px solid var(--pst-color-border); }
+.launch-tablist[hidden], .launch-panel[hidden] { display: none; }
+.launch-tablist button {
+  padding: 0.55rem 0.9rem;
+  border: 1px solid transparent;
+  border-bottom: 3px solid transparent;
+  border-radius: 5px 5px 0 0;
+  background: transparent;
+  color: var(--pst-color-text-base);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.launch-tablist button[aria-selected="true"] { border-bottom-color: var(--pst-color-primary); background: var(--pst-color-surface); color: var(--pst-color-primary); }
+.launch-tablist button:focus-visible { outline: 2px solid var(--pst-color-primary); outline-offset: -2px; }
+.launch-tabs .launch-panel { padding: 1rem; border: 1px solid var(--pst-color-border); border-top: 0; border-radius: 0 0 6px 6px; }
+.launch-panel > :last-child { margin-bottom: 0; }
+@media print {
+  .launch-tablist { display: none; }
+  .launch-panel[hidden] { display: block !important; }
+}
+@media (max-width: 575px) {
+  .bd-article h1 { overflow-wrap: anywhere; }
+}
+
+/* Long code blocks folded by _static/fold-code.js */
+div.fold-code.folded pre { max-height: 340px; overflow: hidden; position: relative; }
+div.fold-code.folded .highlight { position: relative; }
+div.fold-code.folded .highlight::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 80px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0), var(--pst-color-surface, #f5f5f5)); pointer-events: none; }
+.fold-code-btn { display: block; margin: -0.6rem 0 1.2rem; padding: 4px 12px; font-size: 0.9rem; cursor: pointer;
+  border: 1px solid var(--pst-color-border, #d0d0d0); border-radius: 6px; background: var(--pst-color-background, #fff);
+  color: var(--pst-color-text-base, #333); }
+.fold-code-btn:hover { background: var(--pst-color-surface, #f3f3f3); }

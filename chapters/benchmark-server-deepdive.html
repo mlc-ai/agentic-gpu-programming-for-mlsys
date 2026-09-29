@@ -1,0 +1,730 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" data-theme="auto">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Benchmark Server Deep Dive &#8212; Agentic GPU Programming for MLSys</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "auto";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "auto";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/book.css?v=fde79067" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=a5fa425f"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'chapters/benchmark-server-deepdive';</script>
+    <script src="../_static/book-tabs.js?v=3241ad90"></script>
+    <script src="../_static/fold-code.js?v=cc72803f"></script>
+    <link rel="canonical" href="https://mlc.ai/agentic-gpu-programming-for-mlsys/chapters/benchmark-server-deepdive.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Review and Harness Improvement" href="self-improvement.html" />
+    <link rel="prev" title="Compiler Analysis Deep Dive" href="compiler-analysis-deepdive.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="auto">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/mlc-logo-with-text-landscape.svg" class="logo__image only-light" alt="Agentic GPU Programming for MLSys - Home"/>
+    <script>document.write(`<img src="../_static/mlc-logo-with-text-landscape.svg" class="logo__image only-dark" alt="Agentic GPU Programming for MLSys - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Part I, Elements of Agentic GPU Programming</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">Domain-specific Compiler Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="knowledge.html">Knowledge Base for Agents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarking.html">Benchmarking and Profiling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="agent-workflows.html">Agent Workflows</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Part II, TIRx Harness Overview</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="harness.html">Introduction to TIRx Harness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tirx-compiler-foundation.html">TIRx Compiler Foundation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kcoral.html">KCoral Benchmark Server</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Part III, Agentic GPU Programming in Action</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="running-agent-workflows.html">Running Agent Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compiler-analysis-deepdive.html">Compiler Analysis Deep Dive</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Benchmark Server Deep Dive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="self-improvement.html">Review and Harness Improvement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced-tips.html">Advanced Tips</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+<a href="https://github.com/mlc-ai/agentic-gpu-programming-for-mlsys" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Benchmark Server Deep Dive</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#from-an-agent-command-to-a-remote-experiment">From an Agent Command to a Remote Experiment</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#submit-the-experiment">Submit the experiment</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#package-and-execute-it">Package and execute it</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#retrieve-the-result">Retrieve the result</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scripts-the-agent-builds-on-the-commands">Scripts the Agent Builds on the Commands</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#case-study-finding-new-bottlenecks-in-the-kimi-delta-attention-kernel">Case Study: Finding New Bottlenecks in the Kimi Delta Attention Kernel</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="benchmark-server-deep-dive">
+<h1>Benchmark Server Deep Dive<a class="headerlink" href="#benchmark-server-deep-dive" title="Link to this heading">#</a></h1>
+<p>The last chapter took a deep dive into compiler analysis. In this
+chapter, we will do the same for the KCoral benchmark server: how an agent
+runs GPU experiments through it, and how the timing and profiling feedback it
+returns led to new best kernels over the same run.</p>
+<p>Whether a correct kernel is also fast, and where its time goes, can only be
+measured on the GPU. In the Kimi Delta Attention run, every such experiment
+went through the KCoral benchmark server.</p>
+<figure class="interactive-figure">
+  <iframe src="../_static/diagrams/benchmark-feedback.html" title="One command, one remote experiment" class="diagram-frame" height="620"></iframe>
+  <figcaption>Every GPU experiment in the Kimi Delta Attention run was one command on the development machine. Pick an experiment to see the command, the script that runs on the GPU host, and what comes back.</figcaption>
+</figure><section id="from-an-agent-command-to-a-remote-experiment">
+<h2>From an Agent Command to a Remote Experiment<a class="headerlink" href="#from-an-agent-command-to-a-remote-experiment" title="Link to this heading">#</a></h2>
+<p>Using KCoral’s Python API for each check or profile involves constructing a
+program, submitting it, and handling the returned results. Because coding
+agents already use shell commands to work with files and invoke development
+tools, TIRx Harness packages these steps into reusable command-line tools.</p>
+<p>For example, an agent can invoke
+<a class="extlink-harness reference external" href="https://github.com/mlc-ai/TIRx-harness/blob/main/evolution/remote/kcoral_python.py">kcoral_python.py</a>
+for a Python experiment or <a class="extlink-harness reference external" href="https://github.com/mlc-ai/TIRx-harness/blob/main/evolution/remote/kcoral_ncu.py">kcoral_ncu.py</a>
+for profiling, using familiar tool arguments together with the server address
+and local input and output paths. The task adds its own command,
+<code class="docutils literal notranslate"><span class="pre">kcoral_remote.py</span></code>, which submits a candidate to the official benchmark.</p>
+<section id="submit-the-experiment">
+<h3>Submit the experiment<a class="headerlink" href="#submit-the-experiment" title="Link to this heading">#</a></h3>
+<p>In the recorded run, a new best kernel has just been admitted, and the agent
+decides to profile it:</p>
+<blockquote>
+<div><p><strong>Agent:</strong> I’m now taking an NCU snapshot of the new global best itself to identify
+whether its remaining limit is instruction issue, shared-memory/TMA traffic,
+or tensor-core dependency; that will steer the next structurally different
+experiment.</p>
+</div></blockquote>
+<p>Its <code class="docutils literal notranslate"><span class="pre">capture_ncu.py</span></code> imports the candidate, constructs inputs, and launches
+the kernel. The profiling command below omits surrounding shell bookkeeping.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>evolution/remote/kcoral_ncu.py<span class="w"> </span>--remote<span class="w"> </span>http://10.0.2.2:8901<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--send<span class="w"> </span>candidates/kda/forward_b1_t8192_h96/scratch/profile-overlap-diag-inverse<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-o<span class="w"> </span>artifacts/overlap-diag-inverse-gram-tail/kda-full.ncu-rep<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--set<span class="w"> </span>full<span class="w"> </span>--launch-count<span class="w"> </span><span class="m">1</span><span class="w"> </span>--kernel-name<span class="w"> </span>kda_fwd_kernel<span class="w"> </span>--<span class="w"> </span>python<span class="w"> </span>capture_ncu.py
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">--remote</span></code> selects the service endpoint, and <code class="docutils literal notranslate"><span class="pre">--send</span></code> supplies the candidate
+and capture script. <code class="docutils literal notranslate"><span class="pre">-o</span></code> names the local destination for the returned report.
+NCU’s capture options precede <code class="docutils literal notranslate"><span class="pre">--</span></code>; the application follows it. Here the
+capture profiles one launch of the kernel named <code class="docutils literal notranslate"><span class="pre">kda_fwd_kernel</span></code>.</p>
+</section>
+<section id="package-and-execute-it">
+<h3>Package and execute it<a class="headerlink" href="#package-and-execute-it" title="Link to this heading">#</a></h3>
+<p>To execute this command remotely, the wrapper packages the input directory
+into an archive and supplies a Python runner that unpacks the inputs and
+invokes NCU. The following sketch shows how
+<a class="extlink-harness reference external" href="https://github.com/mlc-ai/TIRx-harness/blob/main/evolution/remote/kcoral_tool.py">the wrapper’s helper</a> builds the
+program. <code class="docutils literal notranslate"><span class="pre">runner_source</span></code> is the helper’s remote Python code, and
+<code class="docutils literal notranslate"><span class="pre">input_archive</span></code> is the packaged input directory.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">kcoral</span><span class="w"> </span><span class="kn">import</span> <span class="n">Program</span>
+
+<span class="n">program</span> <span class="o">=</span> <span class="n">Program</span><span class="p">()</span>
+<span class="n">module</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">upload</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">"module"</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">runner_source</span><span class="p">)</span>
+<span class="n">runner</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">get_function</span><span class="p">(</span><span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"ncu"</span><span class="p">)</span>
+<span class="n">inputs</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">upload</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">"bytes"</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">input_archive</span><span class="p">)</span>
+<span class="n">outcome</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+    <span class="n">fn</span><span class="o">=</span><span class="n">runner</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="n">inputs</span><span class="p">,</span> <span class="n">ncu_args</span><span class="p">,</span> <span class="n">application</span><span class="p">,</span> <span class="n">environment_overrides</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">program</span><span class="o">.</span><span class="n">return_</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s2">"outcome"</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">outcome</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The command supplies <code class="docutils literal notranslate"><span class="pre">ncu_args</span></code>, <code class="docutils literal notranslate"><span class="pre">application</span></code>, and <code class="docutils literal notranslate"><span class="pre">environment_overrides</span></code>.
+After <code class="docutils literal notranslate"><span class="pre">Client.execute()</span></code> submits the program, the server schedules GPU access
+and runs the uploaded code. NCU executes in the unpacked input directory,
+and the runner returns its exit status and report bytes.</p>
+</section>
+<section id="retrieve-the-result">
+<h3>Retrieve the result<a class="headerlink" href="#retrieve-the-result" title="Link to this heading">#</a></h3>
+<p>Back on the development machine, the wrapper prints the captured output,
+saves the report to <code class="docutils literal notranslate"><span class="pre">artifacts/overlap-diag-inverse-gram-tail/kda-full.ncu-rep</span></code>,
+and reports the exit status. In the recorded run, the capture succeeds, and
+the agent reads the returned file, and the one it captured for the previous
+best, with local <code class="docutils literal notranslate"><span class="pre">ncu</span> <span class="pre">--import</span></code> to continue its analysis without another GPU
+run:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>$ ncu --import artifacts/product-gamma/kda-full.ncu-rep --page details | rg -i 'Duration|...'
+    Duration                         us       140.06
+$ ncu --import artifacts/overlap-diag-inverse-gram-tail/kda-full.ncu-rep --page details | rg -i 'Duration|...'
+    Duration                         us       135.33
+</pre></div>
+</div>
+<blockquote>
+<div><p><strong>Agent:</strong> NCU confirms the new best reduces the profiled kernel from 140.06 to 135.33
+µs despite adding about 0.23 million executed warp instructions and ~11.7k
+shared-bank conflicts; the win is schedule latency, not instruction
+elimination.</p>
+</div></blockquote>
+<p>GPU correctness tests and benchmark timings go through the same remote
+execution path.</p>
+</section>
+</section>
+<section id="scripts-the-agent-builds-on-the-commands">
+<h2>Scripts the Agent Builds on the Commands<a class="headerlink" href="#scripts-the-agent-builds-on-the-commands" title="Link to this heading">#</a></h2>
+<p>A single command answers one question, but each candidate needs several
+answers in a fixed order: whether it is correct, where its time goes, and how
+fast it runs. The agent also combines these commands into scripts of its own. Late in the
+run, one agent sent all of its GPU work through <code class="docutils literal notranslate"><span class="pre">run_queue.sh</span></code>, a script it
+wrote to run one GPU job at a time. For each candidate, <code class="docutils literal notranslate"><span class="pre">measure</span></code> runs a small
+correctness test through <code class="docutils literal notranslate"><span class="pre">kcoral_python.py</span></code>, captures an IKET trace, and
+submits the official benchmark through <code class="docutils literal notranslate"><span class="pre">kcoral_remote.py</span></code> only if the earlier
+steps pass:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Sequential GPU job queue for the kcoral server (never overlap GPU jobs).</span>
+<span class="nv">REMOTE</span><span class="o">=</span>http://10.0.2.2:8901
+...
+gputest<span class="o">()</span><span class="w"> </span><span class="o">{</span><span class="w">  </span><span class="c1"># $1 = scratch name; returns 0 if 12 clean regimes</span>
+<span class="w">  </span>...
+<span class="w">  </span>timeout<span class="w"> </span><span class="m">900</span><span class="w"> </span>python<span class="w"> </span>evolution/remote/kcoral_python.py<span class="w"> </span>--remote<span class="w"> </span><span class="nv">$REMOTE</span><span class="w"> </span>--send<span class="w"> </span>artifacts/<span class="nv">$n</span>/gputest<span class="w"> </span>-e<span class="w"> </span><span class="nv">CASES</span><span class="o">=</span><span class="nv">$CASES</span><span class="w"> </span>-e<span class="w"> </span><span class="nv">H</span><span class="o">=</span><span class="m">8</span><span class="w"> </span>--timeout<span class="w"> </span><span class="m">600</span><span class="w"> </span>--<span class="w"> </span>test_small.py<span class="w"> </span>&gt;<span class="w"> </span>artifacts/<span class="nv">$n</span>/gputest_run1.log<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span>
+<span class="w">  </span><span class="nb">local</span><span class="w"> </span>c<span class="p">;</span><span class="w"> </span><span class="nv">c</span><span class="o">=</span><span class="k">$(</span>grep<span class="w"> </span>-c<span class="w"> </span><span class="s1">'bad=0.00e+00'</span><span class="w"> </span>artifacts/<span class="nv">$n</span>/gputest_run1.log<span class="k">)</span>
+<span class="w">  </span>...
+<span class="w">  </span><span class="o">[</span><span class="w"> </span><span class="s2">"</span><span class="nv">$c</span><span class="s2">"</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"12"</span><span class="w"> </span><span class="o">]</span>
+<span class="o">}</span>
+
+bench<span class="o">()</span><span class="w"> </span><span class="o">{</span><span class="w">  </span><span class="c1"># $1 = scratch name, $2 = log name</span>
+<span class="w">  </span>...
+<span class="w">  </span>timeout<span class="w"> </span><span class="m">1700</span><span class="w"> </span>python<span class="w"> </span>evolution/remote/kcoral_remote.py<span class="w"> </span>candidates/kda/forward_b1_t8192_h96<span class="w"> </span>scratch/<span class="nv">$n</span><span class="w"> </span>--remote<span class="w"> </span><span class="nv">$REMOTE</span><span class="w"> </span>--timeout<span class="w"> </span><span class="m">1500</span><span class="w"> </span>&gt;<span class="w"> </span>artifacts/<span class="nv">$n</span>/<span class="nv">$log</span><span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span>
+<span class="w">  </span>...
+<span class="o">}</span>
+
+measure<span class="o">()</span><span class="w"> </span><span class="o">{</span><span class="w">  </span><span class="c1"># full pipeline for a scratch candidate</span>
+<span class="w">  </span><span class="nb">local</span><span class="w"> </span><span class="nv">n</span><span class="o">=</span><span class="nv">$1</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span>!<span class="w"> </span>checks_clean<span class="w"> </span><span class="nv">$n</span><span class="p">;</span><span class="w"> </span><span class="k">then</span><span class="w"> </span>stamp<span class="w"> </span><span class="s2">"== </span><span class="nv">$n</span><span class="s2">: CPU checks not clean, skipping"</span><span class="p">;</span><span class="w"> </span><span class="k">return</span><span class="p">;</span><span class="w"> </span><span class="k">fi</span>
+<span class="w">  </span>stamp<span class="w"> </span><span class="s2">"== </span><span class="nv">$n</span><span class="s2">"</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span>!<span class="w"> </span>gputest<span class="w"> </span><span class="nv">$n</span><span class="p">;</span><span class="w"> </span><span class="k">then</span><span class="w"> </span>stamp<span class="w"> </span><span class="s2">"== </span><span class="nv">$n</span><span class="s2">: GPU test not clean, skipping timing"</span><span class="p">;</span><span class="w"> </span><span class="k">return</span><span class="p">;</span><span class="w"> </span><span class="k">fi</span>
+<span class="w">  </span>iket<span class="w"> </span><span class="nv">$n</span>
+<span class="w">  </span>bench<span class="w"> </span><span class="nv">$n</span><span class="w"> </span>bench_run1.log
+<span class="o">}</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">stamp</span></code> prints the server’s load before and after each step:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[load=0] bench gram-swp-c -&gt; bench_run2.log
+[load=0] bench gram-swp-c exit 0
+holdout correctness: PASS
+  kernel:   0.453386 ms
+  speedup:  2.3146x
+</pre></div>
+</div>
+</section>
+<section id="case-study-finding-new-bottlenecks-in-the-kimi-delta-attention-kernel">
+<h2>Case Study: Finding New Bottlenecks in the Kimi Delta Attention Kernel<a class="headerlink" href="#case-study-finding-new-bottlenecks-in-the-kimi-delta-attention-kernel" title="Link to this heading">#</a></h2>
+<p>The commands and scripts above showed how the agent sends an experiment to
+KCoral and retrieves its results. We now follow how those results guide the
+next optimization. In two episodes from the Kimi Delta Attention run, the
+agent uses a profile to identify work it can overlap or data it can move more
+efficiently, changes the kernel, and benchmarks the result. A second profile
+helps it check whether the change had the intended effect.</p>
+<p>The kernel is a single fused kernel with one CTA per head, in which eight
+preprocessing warps prepare each chunk for the MMA and state warps. <code class="docutils literal notranslate"><span class="pre">$WORKLOAD</span></code> stands for the
+task’s workload directory. Output excerpts keep only the key lines; <code class="docutils literal notranslate"><span class="pre">...</span></code>
+marks omitted text.</p>
+<p>At one point, the best kernel runs at 0.497283 ms, 2.1162× over the baseline.
+The agent captures an IKET timeline of it through KCoral and summarizes the time each
+preprocessing warp spends in each stage:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>kcoral_iket.py<span class="w"> </span>--remote<span class="w"> </span>http://10.0.2.2:8901<span class="w"> </span>--send<span class="w"> </span>scratch/product-gamma<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--output-dir<span class="w"> </span>iket_out<span class="w"> </span>--<span class="w"> </span>profile<span class="w"> </span>--postprocess<span class="w"> </span>json<span class="w"> </span>--<span class="w"> </span>python<span class="w"> </span>capture_iket.py
+python<span class="w"> </span>iket_analyze.py<span class="w"> </span>iket_out/iket_pid_0x8e.trace.json<span class="w"> </span><span class="m">13</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>kernel span 139.8 us (ts units assumed ns)
+-- warp 0 (prep)
+   p-gram     mean    0.909 med    0.896 [3072]
+   p-tsolve   mean    0.653 med    0.640 [3072]
+...
+-- warp 2 (prep)
+   p-gram     mean    0.579 med    0.576 [3072]
+   p-tsolve   mean    0.629 med    0.640 [3072]
+</pre></div>
+</div>
+<p>Warps 2 and 3 finish their share of the Gram stage in 0.58 µs; warps 0 and 1
+need 0.91 µs, because they also compute the last two off-diagonal pairs. Until
+then, warps 2 and 3 wait.</p>
+<blockquote>
+<div><p><strong>Agent:</strong> A cleaner overlap is available in the existing hierarchy: after
+the four diagonal Gram tiles are stored, warps 2–3 are otherwise idle while
+warps 0–1 compute the last two off-diagonal pairs. I’m testing an aggregate
+diagonal-ready signal so warps 2–3 can perform the eight 8×8 diagonal
+inversions during that tail, removing the same work from the subsequent
+T-solve without duplicating Gram operands.</p>
+</div></blockquote>
+<p>The agent adds one barrier that the four diagonal producers arrive on, and
+moves the diagonal inversions into the Gram tail:</p>
+<div class="highlight-diff notranslate"><div class="highlight"><pre><span></span><span class="w"> </span>        m_scaled.init(128)
+<span class="gi">+        m_diag = txl.MBarrier(smem, 1)</span>
+<span class="gi">+        m_diag.init(4)</span>
+<span class="w"> </span>        m_state = txl.TCGen05Bar(smem, 1)
+<span class="w"> </span>...
+<span class="w"> </span>                # ===== grams (mma.sync) -&gt; normalized raw G / Bt
+<span class="gi">+                bstage = st_tok.stage</span>
+<span class="w"> </span>                gram_pair(wp, pstage)
+<span class="gi">+                with txl.If(wp &lt; 4), txl.Then():</span>
+<span class="gi">+                    txl.cuda.warp_sync()</span>
+<span class="gi">+                    m_diag.arrive(0, pred=elect())</span>
+<span class="w"> </span>                with txl.If(wp &lt; 2), txl.Then():
+<span class="w"> </span>                    gram_pair(wp + 8, pstage)
+<span class="gi">+                with txl.If((wp &gt;= 2) &amp; (wp &lt; 4)), txl.Then():</span>
+<span class="gi">+                    # All four diagonal Gram tiles are ready.  Invert their</span>
+<span class="gi">+                    # eight 8x8 blocks while warps 0-1 finish pairs 8-9.</span>
+<span class="gi">+                    m_diag.wait(0, st_diag.phase)</span>
+<span class="gi">+                    p_beta.full.wait(st_tok.stage, st_tok.phase)</span>
+<span class="gi">+                    av = s_t[pstage]</span>
+<span class="gi">+                    invert_diag_8x8(av, ((((wp - 2) &amp; 1) * 32 + lane) &gt;&gt; 3) * 8, bstage)</span>
+<span class="w"> </span>                bar_prep()
+<span class="gi">+                st_diag.advance()</span>
+<span class="w"> </span>...
+<span class="w"> </span>                        av = s_t[pstage]
+<span class="gd">-                        with txl.If(wp &lt; 2), txl.Then():</span>
+<span class="gd">-                            invert_diag_8x8(av, (((wp &amp; 1) * 32 + lane) &gt;&gt; 3) * 8, bstage)</span>
+<span class="gd">-                        bar_inv()</span>
+<span class="w"> </span>                        inverse_8_to_16(av, wp * 16)
+</pre></div>
+</div>
+<p>The CPU checks pass, and the official benchmark measures a new best:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>kcoral_remote.py<span class="w"> </span><span class="nv">$WORKLOAD</span><span class="w"> </span>scratch/overlap-diag-inverse-gram-tail<span class="w"> </span>--remote<span class="w"> </span>http://10.0.2.2:8901<span class="w"> </span>--timeout<span class="w"> </span><span class="m">600</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>holdout correctness: PASS
+...
+  baseline: 1.049809 ms
+  kernel:   0.487652 ms
+  speedup:  2.1528x
+</pre></div>
+</div>
+<blockquote>
+<div><p><strong>Agent:</strong> IKET confirms the mechanism rather than a timing fluke: the
+2,048-token capture shrank the worst CTA span from 139.7 to 134.1 µs and the
+steady-state chunk period from 4.139 to 3.972 µs. The critical T-solve range
+fell from about 0.653 to 0.464 µs on the heavy prep warps; I’m now doing the
+required second full official run.</p>
+</div></blockquote>
+<p>IKET shows where time goes inside the kernel, but not what the hardware is
+waiting for. Later in the run, when the best kernel runs at about 0.482 ms,
+the agent profiles one launch of it with NCU through KCoral and reads the
+report’s source counters locally:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>kcoral_ncu.py<span class="w"> </span>--remote<span class="w"> </span>http://10.0.2.2:8901<span class="w"> </span>--send<span class="w"> </span>scratch/profile-qacc-ring<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-o<span class="w"> </span>kda-full.ncu-rep<span class="w"> </span>--set<span class="w"> </span>full<span class="w"> </span>--launch-count<span class="w"> </span><span class="m">1</span><span class="w"> </span>--kernel-name<span class="w"> </span>kda_fwd_kernel<span class="w"> </span>--<span class="w"> </span>python<span class="w"> </span>capture_ncu.py
+ncu<span class="w"> </span>--import<span class="w"> </span>kda-full.ncu-rep<span class="w"> </span>--page<span class="w"> </span>details<span class="w"> </span>--section<span class="w"> </span>SourceCounters
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>    OPT   Est. Speedup: 9.055%
+          This workload has uncoalesced global accesses resulting in a total of 190464 excessive sectors (10% of the
+          total 1837824 sectors). Check the L2 Theoretical Sectors Global Excessive table for the primary source
+          locations.
+</pre></div>
+</div>
+<blockquote>
+<div><p><strong>Agent:</strong> A more concrete target emerged from NCU: 190,464 excessive global
+sectors, almost exactly the strided <code class="docutils literal notranslate"><span class="pre">beta[t,h]</span></code> traffic. Each head CTA loads
+one bf16 every 192 bytes, while neighboring head CTAs need the same cache
+lines.</p>
+</div></blockquote>
+<blockquote>
+<div><p><strong>Agent:</strong> I’m returning to the fastest family with a different mechanism:
+replace the strided per-head beta loads (the exact excessive-sector pattern
+identified by NCU) with a 128-byte TMA gather into shared memory, overlapped
+with the existing Q/K/V TMA issues. The sigmoid remains in-kernel and timed;
+this only changes how raw beta reaches the warp.</p>
+</div></blockquote>
+<p>Because a TMA transfer must move at least 16 bytes in its innermost
+dimension, each CTA gathers an aligned block of eight heads by 64 tokens and
+picks out its own head in shared memory:</p>
+<div class="highlight-diff notranslate"><div class="highlight"><pre><span></span><span class="gi">+            def load_beta_raw(cc):</span>
+<span class="gi">+                p_beta_raw.empty.wait(st_brp.stage, st_brp.phase)</span>
+<span class="gi">+                with txl.If(elected()), txl.Then():</span>
+<span class="gi">+                    p_beta_raw.full.arrive(st_brp.stage, tx_count=C * 8 * 2)</span>
+<span class="gi">+                    txl.ptx[TMA_G2S](</span>
+<span class="gi">+                        s_beta_raw.ptr_to([0, 0, 0]),</span>
+<span class="gi">+                        txl.address_of(beta_map),</span>
+<span class="gi">+                        (head &gt;&gt; 3) &lt;&lt; 3,</span>
+<span class="gi">+                        txl.Cast("int32", cc * C),</span>
+<span class="gi">+                        txl.int32(0),</span>
+<span class="gi">+                        p_beta_raw.full.ptr_to([st_brp.stage]),</span>
+<span class="gi">+                        txl.uint64(TMA_EVICT_FIRST),</span>
+<span class="gi">+                    )</span>
+<span class="gi">+                st_brp.advance()</span>
+<span class="w"> </span>...
+<span class="gi">+                load_beta_raw(c)</span>
+<span class="w"> </span>                p_beta.empty.wait(st_bp.stage, st_bp.phase)
+<span class="gi">+                load_tile(p_k, st_kp, k_map, s_k, c)</span>
+<span class="gi">+                load_tile(p_q, st_qp, q_map, s_q, c)</span>
+<span class="gi">+                load_tile(p_v, st_vp, v_map, s_v, c)</span>
+<span class="gi">+                p_beta_raw.full.wait(st_brc.stage, st_brc.phase)</span>
+<span class="w"> </span>                for i in range(2):
+<span class="gd">-                    tok = txl.Cast("int64", c * C + lane + 32 * i)</span>
+<span class="gd">-                    txl.ptx.ld.global_.nc.b16(hb[i], beta.ptr_to([tok * txl.int64(H) + head64]))</span>
+<span class="gi">+                    txl.ptx.ld.shared.b16(</span>
+<span class="gi">+                        hb[i], s_beta_raw.ptr_to([0, lane + 32 * i, head &amp; 7])</span>
+<span class="gi">+                    )</span>
+<span class="w"> </span>...
+<span class="w"> </span>                st_bp.advance()
+<span class="gi">+                txl.ptx[FENCE_ASYNC]()</span>
+<span class="gi">+                p_beta_raw.empty.arrive(st_brc.stage)</span>
+<span class="gi">+                st_brc.advance()</span>
+</pre></div>
+</div>
+<p>The CPU checks pass, and the official benchmark measures a new best:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>kcoral_remote.py<span class="w"> </span><span class="nv">$WORKLOAD</span><span class="w"> </span>scratch/beta-tma<span class="w"> </span>--remote<span class="w"> </span>http://10.0.2.2:8901<span class="w"> </span>--timeout<span class="w"> </span><span class="m">600</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>holdout correctness: PASS
+...
+  baseline: 1.050434 ms
+  kernel:   0.477359 ms
+  speedup:  2.2005x
+</pre></div>
+</div>
+<p>A second NCU capture of the new kernel confirms that the fix removed the
+bottleneck NCU had reported:</p>
+<blockquote>
+<div><p><strong>Agent:</strong> Exact NCU confirms the mechanism: the target kernel fell from
+190,464 to 6,144 excessive global sectors, while duration improved from
+135.296 to 133.632 µs. Registers and occupancy are unchanged; the tradeoff
+is more shared-bank conflicts (656,485 → 756,377), but the net kernel time
+is lower.</p>
+</div></blockquote>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="compiler-analysis-deepdive.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Compiler Analysis Deep Dive</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="self-improvement.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Review and Harness Improvement</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#from-an-agent-command-to-a-remote-experiment">From an Agent Command to a Remote Experiment</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#submit-the-experiment">Submit the experiment</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#package-and-execute-it">Package and execute it</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#retrieve-the-result">Retrieve the result</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scripts-the-agent-builds-on-the-commands">Scripts the Agent Builds on the Commands</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#case-study-finding-new-bottlenecks-in-the-kimi-delta-attention-kernel">Case Study: Finding New Bottlenecks in the Kimi Delta Attention Kernel</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By TIRx Contributors
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2026, TIRx Contributors.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

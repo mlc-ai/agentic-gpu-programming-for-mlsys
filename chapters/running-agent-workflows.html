@@ -1,0 +1,593 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" data-theme="auto">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Running Agent Workflows &#8212; Agentic GPU Programming for MLSys</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "auto";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "auto";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/book.css?v=fde79067" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=a5fa425f"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'chapters/running-agent-workflows';</script>
+    <script src="../_static/book-tabs.js?v=3241ad90"></script>
+    <script src="../_static/fold-code.js?v=cc72803f"></script>
+    <link rel="canonical" href="https://mlc.ai/agentic-gpu-programming-for-mlsys/chapters/running-agent-workflows.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Compiler Analysis Deep Dive" href="compiler-analysis-deepdive.html" />
+    <link rel="prev" title="KCoral Benchmark Server" href="kcoral.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="auto">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/mlc-logo-with-text-landscape.svg" class="logo__image only-light" alt="Agentic GPU Programming for MLSys - Home"/>
+    <script>document.write(`<img src="../_static/mlc-logo-with-text-landscape.svg" class="logo__image only-dark" alt="Agentic GPU Programming for MLSys - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Part I, Elements of Agentic GPU Programming</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">Domain-specific Compiler Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="knowledge.html">Knowledge Base for Agents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarking.html">Benchmarking and Profiling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="agent-workflows.html">Agent Workflows</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Part II, TIRx Harness Overview</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="harness.html">Introduction to TIRx Harness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tirx-compiler-foundation.html">TIRx Compiler Foundation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kcoral.html">KCoral Benchmark Server</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Part III, Agentic GPU Programming in Action</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Running Agent Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compiler-analysis-deepdive.html">Compiler Analysis Deep Dive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmark-server-deepdive.html">Benchmark Server Deep Dive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="self-improvement.html">Review and Harness Improvement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced-tips.html">Advanced Tips</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+<a href="https://github.com/mlc-ai/agentic-gpu-programming-for-mlsys" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Running Agent Workflows</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prepare-the-environment">Prepare the Environment</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#install-the-harness">Install the harness</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#start-kcoral-on-the-gpu-server">Start KCoral on the GPU server</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#create-the-run-on-the-agent-machine">Create the run on the agent machine</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#check-the-baseline">Check the baseline</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#kick-off-agentic-runs">Kick Off Agentic Runs</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#continuing-through-part-iii">Continuing Through Part III</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="running-agent-workflows">
+<h1>Running Agent Workflows<a class="headerlink" href="#running-agent-workflows" title="Link to this heading">#</a></h1>
+<p>Part I introduced the compiler harness and the <a class="reference internal" href="agent-workflows.html"><span class="std std-doc">agent workflows</span></a>
+that organize an optimization search; Part II described how TIRx Harness provides the
+programming and evaluation tools. We now bring them together to optimize the
+forward pass of Kimi Delta Attention on a B200 GPU, for one sequence of
+8,192 tokens with 96 heads.</p>
+<p>In this chapter, we will prepare the task workspace and GPU evaluation
+service, check the baseline, and launch the optimization run using either
+goal mode or Flame Chase. Once the run starts, the chosen workflow carries
+the task across agent turns while the harness provides the tools and feedback,
+as shown below.</p>
+<figure class="interactive-figure">
+  <iframe src="../_static/diagrams/workflow.html" title="The workflow coordinates agents that use the compiler harness" class="diagram-frame" height="300"></iframe>
+  <figcaption>The workflow coordinates agents across turns; the compiler harness supplies the knowledge, tools, and feedback they use. Click a component to inspect its role.</figcaption>
+</figure><p>During the run, the agent retrieves relevant implementations, writes candidate
+kernels, and submits them for analysis and GPU evaluation. The returned
+feedback guides its next experiment. We begin by preparing the environment
+in which this work will take place.</p>
+<section id="prepare-the-environment">
+<h2>Prepare the Environment<a class="headerlink" href="#prepare-the-environment" title="Link to this heading">#</a></h2>
+<p>An agentic run needs a place for the agent to work and a GPU for its
+experiments, both ready before the agent starts. This example optimizes
+Kimi Delta Attention forward on a B200 with <code class="docutils literal notranslate"><span class="pre">B=1</span></code>,
+<code class="docutils literal notranslate"><span class="pre">T=8192</span></code>, <code class="docutils literal notranslate"><span class="pre">H=96</span></code>, and <code class="docutils literal notranslate"><span class="pre">K=V=128</span></code>. We use two machines: one runs the coding
+agent, and the other is a GPU server running KCoral to execute kernels and
+collect measurements. The agent and KCoral can also run on the same machine.</p>
+<section id="install-the-harness">
+<h3>Install the harness<a class="headerlink" href="#install-the-harness" title="Link to this heading">#</a></h3>
+<p>The environment running the agent needs Python, Rust, and <code class="docutils literal notranslate"><span class="pre">uv</span></code>. The GPU server
+needs CUDA and, for NCU profiling, Nsight Compute.</p>
+<p>Clone the harness where the agent runs and on the GPU server. If they share
+one machine, a single checkout is enough:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/mlc-ai/TIRx-harness.git
+<span class="nb">cd</span><span class="w"> </span>TIRx-harness
+git<span class="w"> </span>submodule<span class="w"> </span>update<span class="w"> </span>--init<span class="w"> </span>thirdparty/tvm-rust-ext
+</pre></div>
+</div>
+<p>On the agent machine, install the harness in your existing Python environment
+from the repository root:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>.
+</pre></div>
+</div>
+</section>
+<section id="start-kcoral-on-the-gpu-server">
+<h3>Start KCoral on the GPU server<a class="headerlink" href="#start-kcoral-on-the-gpu-server" title="Link to this heading">#</a></h3>
+<p>In the GPU server’s terminal, from the harness checkout, install the benchmark
+and server dependencies and start KCoral on GPU 0:</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>KCoral executes arbitrary code. Allow only trusted clients on an isolated
+network; never expose the server to the public internet.</p>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--group<span class="w"> </span>benchmark<span class="w"> </span><span class="s1">'kcoral[server]'</span>
+python<span class="w"> </span>-m<span class="w"> </span>kcoral<span class="w"> </span>--gpus<span class="w"> </span><span class="m">0</span><span class="w"> </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span>--port<span class="w"> </span><span class="m">8000</span>
+</pre></div>
+</div>
+<p>Leave this process running. If both roles use the same machine, open another
+terminal for the agent.</p>
+</section>
+<section id="create-the-run-on-the-agent-machine">
+<h3>Create the run on the agent machine<a class="headerlink" href="#create-the-run-on-the-agent-machine" title="Link to this heading">#</a></h3>
+<p>In the agent machine’s terminal, from the harness checkout, set the server
+address and check that it responds. Replace <code class="docutils literal notranslate"><span class="pre">gpu-server</span></code>
+with the server’s hostname or IP address; use <code class="docutils literal notranslate"><span class="pre">127.0.0.1</span></code> for the same machine.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/path/to/TIRx-harness
+<span class="nb">export</span><span class="w"> </span><span class="nv">KCORAL_URL</span><span class="o">=</span><span class="s2">"http://gpu-server:8000"</span>
+curl<span class="w"> </span>--fail<span class="w"> </span><span class="s2">"</span><span class="nv">$KCORAL_URL</span><span class="s2">/health"</span>
+</pre></div>
+</div>
+<p>Then prepare the fixed-shape task:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>evolution/setup.py<span class="w"> </span>--task<span class="w"> </span>kda_forward_b1_t8192_h96<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--remote<span class="w"> </span><span class="s2">"</span><span class="nv">$KCORAL_URL</span><span class="s2">"</span>
+</pre></div>
+</div>
+<p>Setup creates a worktree with the required environment, skills, and task
+prompt. The run directory contains <code class="docutils literal notranslate"><span class="pre">PROMPT.md</span></code>, <code class="docutils literal notranslate"><span class="pre">manifest.json</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">worktree/</span></code>; candidate kernels will live under
+<code class="docutils literal notranslate"><span class="pre">candidates/kda/forward_b1_t8192_h96/</span></code> in that worktree.</p>
+<p>Set <code class="docutils literal notranslate"><span class="pre">run_dir</span></code> to the absolute path printed by setup, enter the worktree, and
+activate its environment:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">run_dir</span><span class="o">=</span>/absolute/path/printed/as/run_dir
+<span class="nb">cd</span><span class="w"> </span><span class="s2">"</span><span class="nv">$run_dir</span><span class="s2">/worktree"</span>
+<span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+cat<span class="w"> </span><span class="s2">"</span><span class="nv">$run_dir</span><span class="s2">/PROMPT.md"</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">PROMPT.md</span></code> combines the task definition with this run’s worktree path,
+service address, benchmark command, authoring rules, and candidate-recording
+instructions. The prompt asks the agent to make the kernel as fast as possible
+while preserving correctness. Chunking, fusion, layouts, warp roles, and
+pipelining remain the agent’s choices.</p>
+</section>
+<section id="check-the-baseline">
+<h3>Check the baseline<a class="headerlink" href="#check-the-baseline" title="Link to this heading">#</a></h3>
+<p>Before starting the agent, run the benchmark command from <code class="docutils literal notranslate"><span class="pre">PROMPT.md</span></code> with
+<code class="docutils literal notranslate"><span class="pre">CANDIDATE</span></code> replaced by <code class="docutils literal notranslate"><span class="pre">baseline</span></code>. For this task and remote execution mode,
+it has this form:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>evolution/remote/kcoral_remote.py<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>candidates/kda/forward_b1_t8192_h96<span class="w"> </span>baseline<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--remote<span class="w"> </span><span class="s2">"</span><span class="nv">$KCORAL_URL</span><span class="s2">"</span><span class="w"> </span>--timeout<span class="w"> </span><span class="m">600</span>
+</pre></div>
+</div>
+<p>Confirm that the output includes the timed row <code class="docutils literal notranslate"><span class="pre">kda-fwd-h96-fixed</span></code>, seven
+stress probes, and two fp64 probes, all at the required H=96, T=8192 shape.
+The final summary must report <code class="docutils literal notranslate"><span class="pre">passed:</span> <span class="pre">10/10</span></code>; individual rows also print
+<code class="docutils literal notranslate"><span class="pre">passed:</span> <span class="pre">1/1</span></code>. The private holdout result is reported separately. For this
+first call, the candidate is FlashKDA itself, the performance baseline; later
+calls time each passing candidate against it in the same call.</p>
+</section>
+</section>
+<section id="kick-off-agentic-runs">
+<h2>Kick Off Agentic Runs<a class="headerlink" href="#kick-off-agentic-runs" title="Link to this heading">#</a></h2>
+<p>An optimization run lasts many turns, so the agent needs a launcher that keeps
+it working toward the goal instead of stopping after one answer. Start the run
+in the prepared worktree with its environment active. All launch
+options use the same generated task, correctness checks, benchmark, and
+candidate directory.</p>
+<div class="launch-tabs docutils container">
+<div class="launch-tablist" aria-label="Choose how to launch the agentic run" hidden>
+  <button type="button" id="tab-goal-mode" aria-controls="goal-mode">Goal mode</button>
+  <button type="button" id="tab-flame-chase" aria-controls="flame-chase">Flame Chase</button>
+</div><div class="launch-panel docutils container" id="goal-mode">
+<p>Goal mode keeps the optimization objective active across turns. In the agent
+session, enter the following prompt:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>/goal Read ../PROMPT.md in full and carry out the optimization task.
+Reach at least 3.0x speedup over the prescribed performance baseline
+with a reproducibly passing kernel and retain it in the frontier.
+</pre></div>
+</div>
+<p>The 3× speedup target is an example; choose a target that fits your task.</p>
+</div>
+<div class="launch-panel docutils container" id="flame-chase">
+<p>The harness environment includes Humanize. Run
+<a class="reference external" href="https://docs.humanfia.ai/humanize/flows/flame-chase">Flame Chase</a>
+in the prepared terminal:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>hmz<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-f<span class="w"> </span><span class="s1">'git+https://github.com/humanfia/flowverse#flame_chase'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-a<span class="w"> </span><span class="s1">'first_chaser=&lt;first-agent&gt;'</span><span class="w"> </span>-a<span class="w"> </span><span class="s1">'second_chaser=&lt;second-agent&gt;'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-b<span class="w"> </span><span class="nv">duration</span><span class="o">=</span>24h<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="s2">"</span><span class="k">$(</span>cat<span class="w"> </span><span class="s2">"</span><span class="nv">$run_dir</span><span class="s2">/PROMPT.md"</span><span class="k">)</span><span class="s2">"</span>
+</pre></div>
+</div>
+<p>Set <code class="docutils literal notranslate"><span class="pre">first_chaser</span></code> and <code class="docutils literal notranslate"><span class="pre">second_chaser</span></code> to the agents you want to use, each
+written as <code class="docutils literal notranslate"><span class="pre">CLI/MODEL:EFFORT</span></code>. Agents take turns in fresh sessions using the
+same task and worktree. The 24-hour budget controls the run’s duration.</p>
+</div>
+</div>
+<p>Expect the agent to read the task and authoring guidance, inspect relevant
+examples, and create an initial implementation. It can diagnose and revise
+unsuccessful attempts without waiting for you to propose a fix.</p>
+<p>You can use another agent to monitor progress while the optimization agent
+keeps working. Give it access to the session trace, retained candidates, and
+benchmark reports. Ask it to periodically summarize the best passing result,
+recent experiments, current optimization direction, and any issues needing
+attention, with evidence from those records.</p>
+<p>In the generated worktree, open <code class="docutils literal notranslate"><span class="pre">frontier/index.json</span></code> under
+<code class="docutils literal notranslate"><span class="pre">candidates/kda/forward_b1_t8192_h96/</span></code> for the retained candidates and their
+benchmark results.</p>
+</section>
+<section id="continuing-through-part-iii">
+<h2>Continuing Through Part III<a class="headerlink" href="#continuing-through-part-iii" title="Link to this heading">#</a></h2>
+<p>The next two chapters follow analysis and performance feedback from a
+recorded Kimi Delta Attention run to show how the agent diagnoses errors and
+improves its kernels. The remaining chapters turn to reviewing results,
+improving the harness, and keeping future searches productive:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="compiler-analysis-deepdive.html"><span class="std std-doc">Compiler Analysis Deep Dive</span></a> follows
+how the agent calls the analyses, interprets their findings, and repairs
+synchronization and memory-ordering errors.</p></li>
+<li><p><a class="reference internal" href="benchmark-server-deepdive.html"><span class="std std-doc">Benchmark Server Deep Dive</span></a> follows GPU
+experiments through KCoral and shows how timing and profiling feedback
+guides the agent’s next optimization.</p></li>
+<li><p><a class="reference internal" href="self-improvement.html"><span class="std std-doc">Review and Harness Improvement</span></a> examines the
+assumptions behind a speedup and shows how review findings become stronger
+checks, improved tools, and reusable kernels.</p></li>
+<li><p><a class="reference internal" href="advanced-tips.html"><span class="std std-doc">Advanced Tips</span></a> discusses how to keep a long search
+productive by starting with one input shape, retaining promising
+alternatives, managing temporary artifacts, and intervening when needed.</p></li>
+</ul>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="kcoral.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">KCoral Benchmark Server</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="compiler-analysis-deepdive.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Compiler Analysis Deep Dive</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prepare-the-environment">Prepare the Environment</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#install-the-harness">Install the harness</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#start-kcoral-on-the-gpu-server">Start KCoral on the GPU server</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#create-the-run-on-the-agent-machine">Create the run on the agent machine</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#check-the-baseline">Check the baseline</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#kick-off-agentic-runs">Kick Off Agentic Runs</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#continuing-through-part-iii">Continuing Through Part III</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By TIRx Contributors
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2026, TIRx Contributors.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

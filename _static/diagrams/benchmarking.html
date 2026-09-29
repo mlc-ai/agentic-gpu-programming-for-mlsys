@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Benchmarking and profiling for an agent</title>
+<link rel="stylesheet" href="diagrams.css">
+<link rel="stylesheet" href="overview.css">
+<script src="diagrams.js" defer></script>
+<style>
+  .agent strong { font-size: 19px; }
+  .execution { display: grid; grid-template-columns: minmax(0, 1fr) 54px 88px; align-items: center; }
+  .benchmark-server { padding: 12px; border: 1.5px solid var(--overview-border); border-bottom: 5px solid var(--overview-purple); border-radius: 10px; background: var(--overview-fill); }
+  .server-title { display: block; width: 100%; padding: 0 3px 8px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: var(--text); font-size: 20px; font-weight: 650; }
+  .timing { display: block; width: 100%; padding: 9px 3px; border: 1px solid var(--overview-border); border-radius: 5px; background: transparent; }
+  .timing strong { font-size: 16px; font-weight: 600; }
+  .profiling { margin-top: 7px; padding: 8px; border-radius: 7px; background: var(--agent-fill); }
+  .profiling-label { text-align: center; color: var(--muted); font-size: 13px; }
+  .profilers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 5px; }
+  .profiler { min-width: 0; padding: 7px 2px; border: 1px solid var(--overview-border); border-radius: 5px; background: transparent; }
+  .profiler strong { display: block; font-size: 16px; font-weight: 600; }
+  .profiler small { display: block; margin-top: 3px; font-size: 11px; color: var(--muted); }
+  .device-link { margin: 0 4px; text-align: center; color: var(--arrow); font-size: 11px; }
+  .two-way { display: block; position: relative; margin-top: 8px; border-top: 2px solid currentColor; }
+  .two-way::before, .two-way::after { content: ''; position: absolute; top: -5px; border-top: 4px solid transparent; border-bottom: 4px solid transparent; }
+  .two-way::before { left: 0; border-right: 6px solid currentColor; }
+  .two-way::after { right: 0; border-left: 6px solid currentColor; }
+  .device-link.active { color: var(--blue); font-weight: 650; }
+  .device-link.active .two-way { border-width: 3px; }
+  .gpus { width: calc(100% - 12px); margin: 0 12px 12px 0; min-height: 88px; padding: 10px 3px; border: 1px solid var(--overview-border); border-radius: 9px; background: var(--agent-fill); box-shadow: 6px 6px 0 -1px var(--agent-fill), 6px 6px 0 0 var(--overview-border), 12px 12px 0 -1px var(--agent-fill), 12px 12px 0 0 var(--overview-border); }
+  .gpus strong { font-size: 19px; font-weight: 600; }
+  .benchmark-server.active, .timing.active, .profiler.active, .gpus.active { outline: 2px dashed var(--blue); outline-offset: 2px; }
+  .detail h2 { font-size: 16px; }
+  @media (max-width: 560px) {
+    .agent strong { font-size: 17px; }
+    .execution { grid-template-columns: minmax(0, 1fr) 50px 66px; }
+    .benchmark-server { padding: 9px; }
+    .server-title { font-size: 18px; }
+    .timing strong, .profiler strong { font-size: 15px; }
+    .profiling { padding: 7px 5px; }
+    .profilers { gap: 5px; }
+    .gpus { min-height: 72px; }
+    .gpus strong { font-size: 17px; }
+    .device-link { font-size: 10px; }
+  }
+</style>
+</head>
+<body>
+<main data-selection>
+  <div class="overview">
+    <button class="agent" data-select="agent" data-node="agent" data-highlights="server input output" aria-pressed="false" aria-controls="agent">
+      <strong>Agent</strong>
+      <span class="cycle" aria-hidden="true">⟳</span>
+      <small>Run · inspect</small>
+    </button>
+    <div class="links">
+      <div class="link input" data-node="input">Candidate + inputs</div>
+      <div class="link output" data-node="output">Results + profiles</div>
+    </div>
+    <div class="execution">
+      <section class="benchmark-server" data-node="server" aria-label="Benchmark server">
+        <button class="server-title" data-select="server" data-highlights="agent input output device-link gpus" aria-pressed="false" aria-controls="server">Benchmark server</button>
+        <button class="timing" data-select="timing" data-node="timing" data-highlights="agent input output device-link gpus" aria-pressed="false" aria-controls="timing">
+          <strong>Correctness + timing</strong>
+        </button>
+        <div class="profiling">
+          <p class="profiling-label">Profiling</p>
+          <div class="profilers">
+            <button class="profiler" data-select="timeline" data-node="timeline" data-highlights="agent input output device-link gpus" aria-pressed="false" aria-controls="timeline">
+              <strong>IKET</strong><small>Timelines</small>
+            </button>
+            <button class="profiler" data-select="counters" data-node="counters" data-highlights="agent input output device-link gpus" aria-pressed="false" aria-controls="counters">
+              <strong>NCU</strong><small>Counters</small>
+            </button>
+          </div>
+        </div>
+      </section>
+      <div class="device-link" data-node="device-link"><span>Run /<br>measure</span><span class="two-way" aria-hidden="true"></span></div>
+      <button class="gpus" data-select="gpus" data-node="gpus" data-highlights="server device-link" aria-pressed="false" aria-controls="gpus"><strong>GPUs</strong></button>
+    </div>
+  </div>
+  <div class="detail" aria-live="polite">
+    <section id="overview" data-panel="overview">
+      <h2>Measure and diagnose</h2>
+      <p>The benchmark server runs correctness checks, timing, and profiling on the target GPUs. It returns results and profiles that the agent uses to compare candidates and investigate bottlenecks.</p>
+    </section>
+    <section id="agent" data-panel="agent" hidden>
+      <h2>Choose the next experiment</h2>
+      <p>The agent submits candidate code, inputs, and evaluation or profiling code. It compares benchmark results and uses profiles to decide which stage or hardware behavior to investigate next.</p>
+    </section>
+    <section id="server" data-panel="server" hidden>
+      <h2>Coordinate experiments on the target GPUs</h2>
+      <p>The server manages GPU access, cleans up between runs, and returns results and artifacts. It distinguishes completed measurements from timeouts and execution failures.</p>
+    </section>
+    <section id="timing" data-panel="timing" hidden>
+      <h2>Did the candidate improve?</h2>
+      <p>Check the outputs, then compare candidate and baseline timings under the same protocol. The task's evaluation code defines correctness and timing rules; the server provides the execution environment.</p>
+    </section>
+    <section id="timeline" data-panel="timeline" hidden>
+      <h2>Which stage holds up progress?</h2>
+      <p>IKET records named stages inside the kernel by CTA and warp. The timeline shows long waits, stage overlap, and work imbalance, helping the agent locate the part of the schedule to investigate.</p>
+    </section>
+    <section id="counters" data-panel="counters" hidden>
+      <h2>What explains the delay?</h2>
+      <p>Nsight Compute reports throughput, memory traffic, occupancy, and stall metrics. These measurements help the agent investigate a bottleneck and test hypotheses such as bandwidth limits or register spills.</p>
+    </section>
+    <section id="gpus" data-panel="gpus" hidden>
+      <h2>Execute and measure the candidate</h2>
+      <p>The target GPUs execute the candidate kernels. The benchmark server coordinates their use so competing experiments do not interfere with correctness checks, timings, or profiles.</p>
+    </section>
+    <button class="reset" data-select="overview" aria-pressed="true" aria-controls="overview">Clear selection</button>
+  </div>
+</main>
+</body>
+</html>

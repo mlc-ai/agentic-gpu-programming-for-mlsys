@@ -1,0 +1,626 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" data-theme="auto">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>TIRx Compiler Foundation &#8212; Agentic GPU Programming for MLSys</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "auto";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "auto";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/book.css?v=fde79067" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=a5fa425f"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'chapters/tirx-compiler-foundation';</script>
+    <script src="../_static/book-tabs.js?v=3241ad90"></script>
+    <script src="../_static/fold-code.js?v=cc72803f"></script>
+    <link rel="canonical" href="https://mlc.ai/agentic-gpu-programming-for-mlsys/chapters/tirx-compiler-foundation.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="KCoral Benchmark Server" href="kcoral.html" />
+    <link rel="prev" title="Introduction to TIRx Harness" href="harness.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="auto">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/mlc-logo-with-text-landscape.svg" class="logo__image only-light" alt="Agentic GPU Programming for MLSys - Home"/>
+    <script>document.write(`<img src="../_static/mlc-logo-with-text-landscape.svg" class="logo__image only-dark" alt="Agentic GPU Programming for MLSys - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Part I, Elements of Agentic GPU Programming</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">Domain-specific Compiler Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="knowledge.html">Knowledge Base for Agents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarking.html">Benchmarking and Profiling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="agent-workflows.html">Agent Workflows</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Part II, TIRx Harness Overview</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="harness.html">Introduction to TIRx Harness</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">TIRx Compiler Foundation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kcoral.html">KCoral Benchmark Server</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Part III, Agentic GPU Programming in Action</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="running-agent-workflows.html">Running Agent Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compiler-analysis-deepdive.html">Compiler Analysis Deep Dive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmark-server-deepdive.html">Benchmark Server Deep Dive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="self-improvement.html">Review and Harness Improvement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced-tips.html">Advanced Tips</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+<a href="https://github.com/mlc-ai/agentic-gpu-programming-for-mlsys" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>TIRx Compiler Foundation</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#expressing-programs-in-tirx-lite">Expressing Programs in TIRx-lite</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#express-the-optimization-in-source">Express the optimization in source</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#add-support-for-new-instructions">Add support for new instructions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inspect-the-generated-program">Inspect the generated program</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-a-gemm-kernel">Example: A GEMM Kernel</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="tirx-compiler-foundation">
+<h1>TIRx Compiler Foundation<a class="headerlink" href="#tirx-compiler-foundation" title="Link to this heading">#</a></h1>
+<p>An agent may want to move a wait, change a memory layout, or use a new GPU
+instruction. To try these ideas, it needs to express these changes directly
+in kernel code. The previous chapter introduced the compiler
+foundation that supports this work. We now turn to TIRx-lite, the low-level
+Python interface to TIRx used in this book.</p>
+<figure class="interactive-figure">
+  <iframe src="../_static/diagrams/tirx-lite-layers.html" title="From TIRx-lite source to generated code" class="diagram-frame" height="430"></iframe>
+  <figcaption>The source maps almost directly to the code that runs. Click a source line to see the code it becomes.</figcaption>
+</figure><p>This interface leaves the agent responsible for layouts, instruction choices,
+and synchronization. The other harness components support that work: the
+knowledge base supplies implementation examples, program analysis helps
+investigate mistakes, and GPU measurements show whether a change improves
+performance.</p>
+<p>In this chapter, we will describe how an agent expresses an optimization in
+kernel code, adds support for an instruction, and inspects the generated
+program. Small examples introduce each capability; a GEMM kernel
+at the end brings them together.</p>
+<section id="expressing-programs-in-tirx-lite">
+<h2>Expressing Programs in TIRx-lite<a class="headerlink" href="#expressing-programs-in-tirx-lite" title="Link to this heading">#</a></h2>
+<p>To turn an optimization idea into a kernel, the agent needs to control both
+the operations and the dependencies between them. We begin with a scheduling
+change, then follow an instruction from its source call to generated code.</p>
+<section id="express-the-optimization-in-source">
+<h3>Express the optimization in source<a class="headerlink" href="#express-the-optimization-in-source" title="Link to this heading">#</a></h3>
+<p>Overlapping a load with computation requires control over where the consumer
+waits for its data. The agent can place the wait directly in kernel code. The
+<a class="reference external" href="https://tvm.apache.org/docs/tirx/overview.html#authoring-layers-and-ir">TIRx architecture</a>
+represents expressions, control flow, buffers, and backend operations in a
+shared object model. Higher-level tile operations can expand into lower-level
+statements and calls within that model, so the program level can be raised
+where a task benefits from it without losing access to the level below.</p>
+<p>TIRx-lite’s
+<a class="extlink-kernels reference external" href="https://github.com/mlc-ai/TIRx-kernels/blob/main/tirx_kernels/tirx_lite/__init__.py">authoring interface</a> exposes layout,
+instruction, and pipeline choices in source. <code class="docutils literal notranslate"><span class="pre">txl.smem_pool()</span></code> allocates
+shared-memory tiles with explicit swizzles, and view helpers compute addresses
+and instruction descriptors. <code class="docutils literal notranslate"><span class="pre">txl.ptx</span></code> supplies explicit PTX calls for data
+operations, with CUDA-level control flow. <code class="docutils literal notranslate"><span class="pre">txl.specialize()</span></code> assigns warp
+roles, while explicit synchronization primitives let the agent place waits
+and completion signals.</p>
+<p>This control leaves the agent responsible for data readiness and buffer
+lifetimes. A compiler-managed schedule can reduce that burden, but also
+limits which scheduling changes the agent can express directly.</p>
+<p>With the operand load already issued, for example, the agent can move
+independent work before the wait:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Before</span>
+<span class="n">pipe</span><span class="o">.</span><span class="n">full</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">stage</span><span class="p">,</span> <span class="n">phase</span><span class="p">)</span>
+<span class="n">compute_independent_work</span><span class="p">()</span>
+<span class="n">consume_loaded_tile</span><span class="p">()</span>
+
+<span class="c1"># After</span>
+<span class="n">compute_independent_work</span><span class="p">()</span>
+<span class="n">pipe</span><span class="o">.</span><span class="n">full</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">stage</span><span class="p">,</span> <span class="n">phase</span><span class="p">)</span>
+<span class="n">consume_loaded_tile</span><span class="p">()</span>
+</pre></div>
+</div>
+<figure class="interactive-figure">
+  <iframe src="../_static/diagrams/wait-placement.html" title="Move the wait, keep the dependency" class="diagram-frame" height="640"></iframe>
+  <figcaption>Independent work must not access the incoming tile. The wait must observe the matching load's completion; the producer may reuse the buffer only after consumption finishes.</figcaption>
+</figure></section>
+<section id="add-support-for-new-instructions">
+<h3>Add support for new instructions<a class="headerlink" href="#add-support-for-new-instructions" title="Link to this heading">#</a></h3>
+<p>An optimization may need a hardware instruction that is not yet available
+through <code class="docutils literal notranslate"><span class="pre">txl.ptx</span></code>. TIRx supports extending the instruction interface by
+registering operand types, effects, and PTX emission. Kernel code can then
+call the registered instruction through <code class="docutils literal notranslate"><span class="pre">txl.ptx</span></code>; analysis support also
+requires a model of its behavior where applicable.</p>
+<p>Keeping extensions local reduces the amount of compiler code that must
+change for a new instruction. Its meaning still needs to agree across code
+generation and analysis: both must interpret the same operands and effects.</p>
+<p>To see how a registered instruction is used, consider <code class="docutils literal notranslate"><span class="pre">add.f32</span></code>. The vector
+addition kernel from the opening figure calls it between a pair of loads and
+a store:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">tirx_kernels.tirx_lite</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">txl</span>
+
+
+<span class="nd">@txl</span><span class="o">.</span><span class="n">kernel</span><span class="p">(</span><span class="n">warps</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s2">"n"</span><span class="p">]</span> <span class="o">+</span> <span class="mi">127</span><span class="p">)</span> <span class="o">//</span> <span class="mi">128</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">vector_add</span><span class="p">(</span>
+    <span class="n">a</span><span class="p">:</span> <span class="n">txl</span><span class="o">.</span><span class="n">gptr</span><span class="p">(</span><span class="n">txl</span><span class="o">.</span><span class="n">f32</span><span class="p">),</span> <span class="n">b</span><span class="p">:</span> <span class="n">txl</span><span class="o">.</span><span class="n">gptr</span><span class="p">(</span><span class="n">txl</span><span class="o">.</span><span class="n">f32</span><span class="p">),</span>
+    <span class="n">out</span><span class="p">:</span> <span class="n">txl</span><span class="o">.</span><span class="n">gptr</span><span class="p">(</span><span class="n">txl</span><span class="o">.</span><span class="n">f32</span><span class="p">),</span> <span class="n">n</span><span class="p">:</span> <span class="n">txl</span><span class="o">.</span><span class="n">i32</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">txl</span><span class="o">.</span><span class="n">cta_id</span><span class="p">()</span> <span class="o">*</span> <span class="mi">128</span> <span class="o">+</span> <span class="n">txl</span><span class="o">.</span><span class="n">thread_id</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">txl</span><span class="o">.</span><span class="n">If</span><span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">),</span> <span class="n">txl</span><span class="o">.</span><span class="n">Then</span><span class="p">():</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">txl</span><span class="o">.</span><span class="n">local_scalar</span><span class="p">(</span><span class="n">txl</span><span class="o">.</span><span class="n">f32</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">txl</span><span class="o">.</span><span class="n">local_scalar</span><span class="p">(</span><span class="n">txl</span><span class="o">.</span><span class="n">f32</span><span class="p">)</span>
+        <span class="n">txl</span><span class="o">.</span><span class="n">ptx</span><span class="o">.</span><span class="n">ld</span><span class="o">.</span><span class="n">global_</span><span class="o">.</span><span class="n">f32</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">ptr_to</span><span class="p">([</span><span class="n">i</span><span class="p">]))</span>
+        <span class="n">txl</span><span class="o">.</span><span class="n">ptx</span><span class="o">.</span><span class="n">ld</span><span class="o">.</span><span class="n">global_</span><span class="o">.</span><span class="n">f32</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">ptr_to</span><span class="p">([</span><span class="n">i</span><span class="p">]))</span>
+        <span class="n">txl</span><span class="o">.</span><span class="n">ptx</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">f32</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">txl</span><span class="o">.</span><span class="n">ptx</span><span class="o">.</span><span class="n">st</span><span class="o">.</span><span class="n">global_</span><span class="o">.</span><span class="n">f32</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">ptr_to</span><span class="p">([</span><span class="n">i</span><span class="p">]),</span> <span class="n">x</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The instruction calls take explicit operands, with destinations first.
+<code class="docutils literal notranslate"><span class="pre">txl.If</span></code> and <code class="docutils literal notranslate"><span class="pre">ptr_to</span></code> construct the surrounding control flow and addressing.</p>
+<figure class="interactive-figure">
+  <iframe src="../_static/diagrams/instruction-registration.html" title="add.f32: from registration to PTX" class="diagram-frame" height="380"></iframe>
+  <figcaption>The <code>add.f32</code> registration specifies read/write access and PTX emission. The call <code>txl.ptx.add.f32(x, x, y)</code> supplies the operands; the written operand becomes an output of the generated instruction.</figcaption>
+</figure></section>
+<section id="inspect-the-generated-program">
+<h3>Inspect the generated program<a class="headerlink" href="#inspect-the-generated-program" title="Link to this heading">#</a></h3>
+<p>To judge an optimization, the agent needs to connect its source edit to the
+operations the GPU will execute. The explicit instruction calls lower to
+inline PTX in generated CUDA. The downstream <code class="docutils literal notranslate"><span class="pre">ptxas</span></code> compiler handles
+machine-level optimization. The kernel object exposes its intermediate
+representation (IR), generated source, and compiled module:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">vector_add</span><span class="o">.</span><span class="n">func</span>        <span class="c1"># the TIRx IR used for compilation and analysis</span>
+<span class="n">vector_add</span><span class="o">.</span><span class="n">source</span><span class="p">()</span>    <span class="c1"># the generated CUDA source</span>
+<span class="n">vector_add</span><span class="o">.</span><span class="n">compile</span><span class="p">()</span>   <span class="c1"># a runnable module</span>
+</pre></div>
+</div>
+<p>In the generated source, each instruction call becomes one inline PTX
+instruction, such as <code class="docutils literal notranslate"><span class="pre">add.f32</span> <span class="pre">%0,</span> <span class="pre">%1,</span> <span class="pre">%2;</span></code>.</p>
+<figure class="interactive-figure">
+  <iframe src="../_static/diagrams/inspect-levels.html" title="One kernel, three views" class="diagram-frame" height="380"></iframe>
+  <figcaption>The same addition in source, in the IR that analyses consume, and in the generated CUDA.</figcaption>
+</figure><p>For example, a layout conversion is written directly as PTX operations:
+shuffles, or shared-memory loads and stores with synchronization. The source
+shows which threads exchange values and which addresses they use, so the
+agent can edit those operations directly when it changes the producer or
+consumer layout. This visibility requires more hardware knowledge from the
+agent. In a higher-level interface, one layout conversion may stand for many
+such operations; inspecting generated code is then needed to understand the
+work behind that single source operation.</p>
+</section>
+</section>
+<section id="example-a-gemm-kernel">
+<h2>Example: A GEMM Kernel<a class="headerlink" href="#example-a-gemm-kernel" title="Link to this heading">#</a></h2>
+<p>A complete kernel must combine instruction choices, memory layouts, and
+synchronization into one program. We can see these choices together in the
+following GEMM kernel, which computes a 128×128 tile of <code class="docutils literal notranslate"><span class="pre">D</span> <span class="pre">=</span> <span class="pre">A</span> <span class="pre">Bᵀ</span></code> with FP16
+inputs and output on one CTA (thread block).
+All threads copy <code class="docutils literal notranslate"><span class="pre">A</span></code> and <code class="docutils literal notranslate"><span class="pre">B</span></code> into swizzled shared memory; one thread issues
+the Tensor Core MMAs into Tensor Memory and signals an mbarrier when they
+complete; then each warp reads 32 rows of the result back, converts them to
+FP16, and stores them.</p>
+<div class="fold-code highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">tirx_kernels.tirx_lite</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">txl</span>
+
+<span class="n">M</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">K</span> <span class="o">=</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">64</span>
+<span class="n">MMA</span> <span class="o">=</span> <span class="s2">"tcgen05.mma.cta_group::1.kind::f16"</span>
+<span class="n">IDESC</span> <span class="o">=</span> <span class="mh">0x08200010</span>          <span class="c1"># f16 x f16 -&gt; f32, M=128, N=128, A and B K-major</span>
+<span class="n">TMEM_LD</span> <span class="o">=</span> <span class="s2">"tcgen05.ld.sync.aligned.32x32b.x32.b32"</span>
+
+
+<span class="nd">@txl</span><span class="o">.</span><span class="n">kernel</span><span class="p">(</span><span class="n">warps</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">gemm</span><span class="p">(</span><span class="n">A</span><span class="p">:</span> <span class="n">txl</span><span class="o">.</span><span class="n">gptr</span><span class="p">[</span><span class="n">txl</span><span class="o">.</span><span class="n">f16</span><span class="p">,</span> <span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">K</span><span class="p">)],</span> <span class="n">B</span><span class="p">:</span> <span class="n">txl</span><span class="o">.</span><span class="n">gptr</span><span class="p">[</span><span class="n">txl</span><span class="o">.</span><span class="n">f16</span><span class="p">,</span> <span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">K</span><span class="p">)],</span>
+         <span class="n">D</span><span class="p">:</span> <span class="n">txl</span><span class="o">.</span><span class="n">gptr</span><span class="p">[</span><span class="n">txl</span><span class="o">.</span><span class="n">f16</span><span class="p">,</span> <span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">N</span><span class="p">)]):</span>
+    <span class="n">warp</span><span class="p">,</span> <span class="n">lane</span><span class="p">,</span> <span class="n">tid</span> <span class="o">=</span> <span class="n">txl</span><span class="o">.</span><span class="n">warp_id</span><span class="p">(),</span> <span class="n">txl</span><span class="o">.</span><span class="n">lane_id</span><span class="p">(),</span> <span class="n">txl</span><span class="o">.</span><span class="n">thread_id</span><span class="p">()</span>
+
+    <span class="c1"># Shared memory: TMEM address slot, one mbarrier, swizzled A and B tiles.</span>
+    <span class="n">smem</span> <span class="o">=</span> <span class="n">txl</span><span class="o">.</span><span class="n">smem_pool</span><span class="p">()</span>
+    <span class="n">tmem_slot</span> <span class="o">=</span> <span class="n">smem</span><span class="o">.</span><span class="n">alloc</span><span class="p">((</span><span class="mi">1</span><span class="p">,),</span> <span class="s2">"uint32"</span><span class="p">)</span>
+    <span class="n">bar</span> <span class="o">=</span> <span class="n">smem</span><span class="o">.</span><span class="n">alloc</span><span class="p">((</span><span class="mi">1</span><span class="p">,),</span> <span class="s2">"uint64"</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="n">As</span> <span class="o">=</span> <span class="n">smem</span><span class="o">.</span><span class="n">alloc</span><span class="p">((</span><span class="n">M</span><span class="p">,</span> <span class="n">K</span><span class="p">),</span> <span class="s2">"float16"</span><span class="p">,</span> <span class="n">swizzle</span><span class="o">=</span><span class="n">txl</span><span class="o">.</span><span class="n">SW128B</span><span class="p">)</span>
+    <span class="n">Bs</span> <span class="o">=</span> <span class="n">smem</span><span class="o">.</span><span class="n">alloc</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">K</span><span class="p">),</span> <span class="s2">"float16"</span><span class="p">,</span> <span class="n">swizzle</span><span class="o">=</span><span class="n">txl</span><span class="o">.</span><span class="n">SW128B</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">txl</span><span class="o">.</span><span class="n">If</span><span class="p">(</span><span class="n">warp</span> <span class="o">==</span> <span class="mi">0</span><span class="p">),</span> <span class="n">txl</span><span class="o">.</span><span class="n">Then</span><span class="p">():</span>
+        <span class="n">txl</span><span class="o">.</span><span class="n">ptx</span><span class="o">.</span><span class="n">tcgen05</span><span class="o">.</span><span class="n">alloc</span><span class="o">.</span><span class="n">cta_group__1</span><span class="o">.</span><span class="n">sync</span><span class="o">.</span><span class="n">aligned</span><span class="o">.</span><span class="n">shared__cta</span><span class="o">.</span><span class="n">b32</span><span class="p">(</span>
+            <span class="n">tmem_slot</span><span class="o">.</span><span class="n">ptr_to</span><span class="p">([</span><span class="mi">0</span><span class="p">]),</span> <span class="n">txl</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="n">N</span><span class="p">))</span>
+    <span class="k">with</span> <span class="n">txl</span><span class="o">.</span><span class="n">If</span><span class="p">(</span><span class="n">tid</span> <span class="o">==</span> <span class="mi">0</span><span class="p">),</span> <span class="n">txl</span><span class="o">.</span><span class="n">Then</span><span class="p">():</span>
+        <span class="n">txl</span><span class="o">.</span><span class="n">ptx</span><span class="o">.</span><span class="n">mbarrier</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">shared</span><span class="o">.</span><span class="n">b64</span><span class="p">(</span><span class="n">bar</span><span class="o">.</span><span class="n">ptr_to</span><span class="p">([</span><span class="mi">0</span><span class="p">]),</span> <span class="n">txl</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="c1"># Load: thread t copies row t of A and of B into shared memory, 16 bytes at a time.</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">txl</span><span class="o">.</span><span class="n">alloc_local</span><span class="p">([</span><span class="mi">4</span><span class="p">],</span> <span class="s2">"uint32"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">K</span> <span class="o">//</span> <span class="mi">8</span><span class="p">):</span>
+        <span class="n">txl</span><span class="o">.</span><span class="n">ptx</span><span class="o">.</span><span class="n">ld</span><span class="o">.</span><span class="n">global_</span><span class="o">.</span><span class="n">v4</span><span class="o">.</span><span class="n">u32</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">A</span><span class="o">.</span><span class="n">ptr_to</span><span class="p">([</span><span class="n">tid</span><span class="p">,</span> <span class="n">j</span> <span class="o">*</span> <span class="mi">8</span><span class="p">]))</span>
+        <span class="n">txl</span><span class="o">.</span><span class="n">ptx</span><span class="o">.</span><span class="n">st</span><span class="o">.</span><span class="n">shared</span><span class="o">.</span><span class="n">v4</span><span class="o">.</span><span class="n">u32</span><span class="p">(</span><span class="n">As</span><span class="o">.</span><span class="n">ptr_to</span><span class="p">(</span><span class="n">tid</span><span class="p">,</span> <span class="n">j</span> <span class="o">*</span> <span class="mi">8</span><span class="p">),</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">txl</span><span class="o">.</span><span class="n">ptx</span><span class="o">.</span><span class="n">ld</span><span class="o">.</span><span class="n">global_</span><span class="o">.</span><span class="n">v4</span><span class="o">.</span><span class="n">u32</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">B</span><span class="o">.</span><span class="n">ptr_to</span><span class="p">([</span><span class="n">tid</span><span class="p">,</span> <span class="n">j</span> <span class="o">*</span> <span class="mi">8</span><span class="p">]))</span>
+        <span class="n">txl</span><span class="o">.</span><span class="n">ptx</span><span class="o">.</span><span class="n">st</span><span class="o">.</span><span class="n">shared</span><span class="o">.</span><span class="n">v4</span><span class="o">.</span><span class="n">u32</span><span class="p">(</span><span class="n">Bs</span><span class="o">.</span><span class="n">ptr_to</span><span class="p">(</span><span class="n">tid</span><span class="p">,</span> <span class="n">j</span> <span class="o">*</span> <span class="mi">8</span><span class="p">),</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+    <span class="n">txl</span><span class="o">.</span><span class="n">ptx</span><span class="o">.</span><span class="n">fence</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">async_</span><span class="o">.</span><span class="n">shared__cta</span><span class="p">()</span>
+    <span class="n">txl</span><span class="o">.</span><span class="n">ptx</span><span class="o">.</span><span class="n">fence</span><span class="o">.</span><span class="n">mbarrier_init</span><span class="o">.</span><span class="n">release</span><span class="o">.</span><span class="n">cluster</span><span class="p">()</span>
+    <span class="n">txl</span><span class="o">.</span><span class="n">ptx</span><span class="o">.</span><span class="n">tcgen05</span><span class="o">.</span><span class="n">fence__before_thread_sync</span><span class="p">()</span>
+    <span class="n">txl</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">cta_sync</span><span class="p">()</span>
+    <span class="n">txl</span><span class="o">.</span><span class="n">ptx</span><span class="o">.</span><span class="n">tcgen05</span><span class="o">.</span><span class="n">fence__after_thread_sync</span><span class="p">()</span>
+    <span class="n">tmem</span> <span class="o">=</span> <span class="n">txl</span><span class="o">.</span><span class="n">local_scalar</span><span class="p">(</span><span class="n">txl</span><span class="o">.</span><span class="n">u32</span><span class="p">)</span>
+    <span class="n">txl</span><span class="o">.</span><span class="n">ptx</span><span class="o">.</span><span class="n">ld</span><span class="o">.</span><span class="n">shared</span><span class="o">.</span><span class="n">u32</span><span class="p">(</span><span class="n">tmem</span><span class="p">,</span> <span class="n">tmem_slot</span><span class="o">.</span><span class="n">ptr_to</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span>
+
+    <span class="c1"># Compute: one thread issues the MMAs into Tensor Memory and signals the barrier.</span>
+    <span class="k">with</span> <span class="n">txl</span><span class="o">.</span><span class="n">If</span><span class="p">(</span><span class="n">tid</span> <span class="o">==</span> <span class="mi">0</span><span class="p">),</span> <span class="n">txl</span><span class="o">.</span><span class="n">Then</span><span class="p">():</span>
+        <span class="n">txl</span><span class="o">.</span><span class="n">idioms</span><span class="o">.</span><span class="n">mma_chain</span><span class="p">(</span><span class="n">MMA</span><span class="p">,</span> <span class="n">tmem</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">As</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">Bs</span><span class="p">,</span> <span class="n">idesc</span><span class="o">=</span><span class="n">IDESC</span><span class="p">,</span>
+                             <span class="n">pred</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">accumulate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">guard</span><span class="o">=</span><span class="s2">"pred"</span><span class="p">)</span>
+        <span class="n">txl</span><span class="o">.</span><span class="n">ptx</span><span class="p">[</span><span class="s2">"tcgen05.commit.cta_group::1.mbarrier::arrive::one.shared::cluster.b64"</span><span class="p">](</span>
+            <span class="n">bar</span><span class="o">.</span><span class="n">ptr_to</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">txl</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">mbarrier_wait</span><span class="p">(</span><span class="n">bar</span><span class="o">.</span><span class="n">ptr_to</span><span class="p">([</span><span class="mi">0</span><span class="p">]),</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">txl</span><span class="o">.</span><span class="n">ptx</span><span class="o">.</span><span class="n">tcgen05</span><span class="o">.</span><span class="n">fence__after_thread_sync</span><span class="p">()</span>
+
+    <span class="c1"># Write back: warp w reads rows 32w..32w+31 from Tensor Memory, converts, stores.</span>
+    <span class="n">acc</span> <span class="o">=</span> <span class="n">txl</span><span class="o">.</span><span class="n">alloc_local</span><span class="p">([</span><span class="mi">32</span><span class="p">],</span> <span class="s2">"float32"</span><span class="p">)</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">txl</span><span class="o">.</span><span class="n">alloc_local</span><span class="p">([</span><span class="mi">16</span><span class="p">],</span> <span class="s2">"uint32"</span><span class="p">)</span>
+    <span class="n">row</span> <span class="o">=</span> <span class="n">warp</span> <span class="o">*</span> <span class="mi">32</span> <span class="o">+</span> <span class="n">lane</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span> <span class="o">//</span> <span class="mi">32</span><span class="p">):</span>
+        <span class="n">txl</span><span class="o">.</span><span class="n">ptx</span><span class="p">[</span><span class="n">TMEM_LD</span><span class="p">](</span><span class="o">*</span><span class="p">[</span><span class="n">acc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">32</span><span class="p">)],</span>
+                         <span class="n">tmem</span> <span class="o">+</span> <span class="p">(</span><span class="n">txl</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">warp</span> <span class="o">*</span> <span class="mi">32</span><span class="p">,</span> <span class="s2">"uint32"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">16</span><span class="p">)</span> <span class="o">+</span> <span class="n">c</span> <span class="o">*</span> <span class="mi">32</span><span class="p">)</span>
+        <span class="n">txl</span><span class="o">.</span><span class="n">ptx</span><span class="o">.</span><span class="n">tcgen05</span><span class="o">.</span><span class="n">wait__ld</span><span class="o">.</span><span class="n">sync</span><span class="o">.</span><span class="n">aligned</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">16</span><span class="p">):</span>
+            <span class="n">txl</span><span class="o">.</span><span class="n">ptx</span><span class="p">[</span><span class="s2">"cvt.rn.f16x2.f32"</span><span class="p">](</span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">acc</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">acc</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">i</span><span class="p">])</span>
+            <span class="n">txl</span><span class="o">.</span><span class="n">ptx</span><span class="o">.</span><span class="n">st</span><span class="o">.</span><span class="n">global_</span><span class="o">.</span><span class="n">u32</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">ptr_to</span><span class="p">([</span><span class="n">row</span><span class="p">,</span> <span class="n">c</span> <span class="o">*</span> <span class="mi">32</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">i</span><span class="p">]),</span> <span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="n">txl</span><span class="o">.</span><span class="n">ptx</span><span class="o">.</span><span class="n">tcgen05</span><span class="o">.</span><span class="n">fence__before_thread_sync</span><span class="p">()</span>
+    <span class="n">txl</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">cta_sync</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">txl</span><span class="o">.</span><span class="n">If</span><span class="p">(</span><span class="n">warp</span> <span class="o">==</span> <span class="mi">0</span><span class="p">),</span> <span class="n">txl</span><span class="o">.</span><span class="n">Then</span><span class="p">():</span>
+        <span class="n">txl</span><span class="o">.</span><span class="n">ptx</span><span class="o">.</span><span class="n">tcgen05</span><span class="o">.</span><span class="n">relinquish_alloc_permit</span><span class="o">.</span><span class="n">cta_group__1</span><span class="o">.</span><span class="n">sync</span><span class="o">.</span><span class="n">aligned</span><span class="p">()</span>
+        <span class="n">txl</span><span class="o">.</span><span class="n">ptx</span><span class="o">.</span><span class="n">tcgen05</span><span class="o">.</span><span class="n">dealloc</span><span class="o">.</span><span class="n">cta_group__1</span><span class="o">.</span><span class="n">sync</span><span class="o">.</span><span class="n">aligned</span><span class="o">.</span><span class="n">b32</span><span class="p">(</span><span class="n">tmem</span><span class="p">,</span> <span class="n">txl</span><span class="o">.</span><span class="n">uint32</span><span class="p">(</span><span class="n">N</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Read the kernel in three stages. The load stage chooses the shared-memory
+layout and copies the operands into it. The compute stage issues the matrix
+multiply-accumulate operations and arranges a completion signal. The writeback
+stage waits for that signal, reads the accumulator, and stores the result.
+Allocation and release surround these stages to manage Tensor Memory’s
+lifetime.</p>
+<p>These choices give the agent concrete places to edit a kernel: it can change
+the layout, the instructions, or the schedule and inspect the resulting
+program. Analysis can help diagnose errors in a candidate, but evaluating its
+performance requires measurements on the target GPU. The
+<a class="reference internal" href="kcoral.html"><span class="std std-doc">next chapter</span></a> describes how KCoral supplies that execution
+environment.</p>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="harness.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Introduction to TIRx Harness</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="kcoral.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">KCoral Benchmark Server</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#expressing-programs-in-tirx-lite">Expressing Programs in TIRx-lite</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#express-the-optimization-in-source">Express the optimization in source</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#add-support-for-new-instructions">Add support for new instructions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inspect-the-generated-program">Inspect the generated program</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-a-gemm-kernel">Example: A GEMM Kernel</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By TIRx Contributors
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2026, TIRx Contributors.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

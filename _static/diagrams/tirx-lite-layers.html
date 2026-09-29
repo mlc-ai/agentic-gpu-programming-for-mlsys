@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>From TIRx-lite source to generated code</title>
+<link rel="stylesheet" href="diagrams.css">
+<script src="diagrams.js" defer></script>
+<style>
+  h2 { margin: 0 0 5px; font-size: 18px; }
+  .subtitle { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+  .two-col { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .code-line { white-space: pre; overflow: hidden; text-overflow: ellipsis; }
+  .src button.code-line { background: transparent; border-color: transparent; }
+  .src button.code-line:hover { background: var(--blue-bg); }
+  .src button.code-line[aria-pressed="true"] { background: var(--blue-bg); border-color: var(--blue); }
+  .code-line[data-node].active { background: var(--blue-bg); }
+  .op { color: var(--blue); font-weight: 650; }
+  .detail { min-height: 78px; }
+  @media (max-width: 580px) { .two-col { grid-template-columns: minmax(0, 1fr); } }
+</style>
+</head>
+<body>
+<main data-selection>
+  <h2>From TIRx-lite source to generated code</h2>
+  <p class="subtitle">Schematic. Click a source line to see the code it becomes.</p>
+  <div class="two-col">
+    <section>
+      <p class="label">TIRx-lite source</p>
+      <div class="code src">
+        <button class="code-line" data-select="entry" data-highlights="g-entry" aria-pressed="false">@txl.kernel(warps=4, grid=...)</button>
+        <button class="code-line" data-select="coord" data-highlights="g-coord" aria-pressed="false">i = txl.cta_id() * 128 + txl.thread_id()</button>
+        <button class="code-line" data-select="if" data-highlights="g-if" aria-pressed="false">with txl.If(i &lt; n), txl.Then():</button>
+        <button class="code-line" data-select="ld" data-highlights="g-ld" aria-pressed="false">  txl.ptx.<span class="op">ld.global_.f32</span>(x, a.ptr_to([i]))</button>
+        <button class="code-line" data-select="add" data-highlights="g-add" aria-pressed="true">  txl.ptx.<span class="op">add.f32</span>(x, x, y)</button>
+        <button class="code-line" data-select="st" data-highlights="g-st" aria-pressed="false">  txl.ptx.<span class="op">st.global_.f32</span>(out.ptr_to([i]), x)</button>
+      </div>
+    </section>
+    <section>
+      <p class="label">Generated CUDA</p>
+      <div class="code">
+        <span class="code-line" data-node="g-entry">__global__ void vector_add_kernel(...) {</span>
+        <span class="code-line" data-node="g-coord">  int i = blockIdx.x * 128 + threadIdx.x;</span>
+        <span class="code-line" data-node="g-if">  if (i &lt; n) {</span>
+        <span class="code-line" data-node="g-ld">    asm("<span class="op">ld.global.f32</span> %0, [%1];" ...);</span>
+        <span class="code-line" data-node="g-add">    asm("<span class="op">add.f32</span> %0, %1, %2;" ...);</span>
+        <span class="code-line" data-node="g-st">    asm("<span class="op">st.global.f32</span> [%0], %1;" ...);</span>
+      </div>
+    </section>
+  </div>
+  <div class="detail">
+    <div data-panel="entry" hidden><h2>Kernel entry</h2><p><code>@txl.kernel</code> fixes the CTA width and becomes a CUDA kernel.</p></div>
+    <div data-panel="coord" hidden><h2>Coordinates</h2><p>The entry's block and thread indices become <code>blockIdx</code> and <code>threadIdx</code>.</p></div>
+    <div data-panel="if" hidden><h2>Control flow</h2><p><code>txl.If</code> is CUDA-level control flow and becomes an ordinary <code>if</code>.</p></div>
+    <div data-panel="ld" hidden><h2>One call, one instruction</h2><p>The load becomes exactly one <code>ld.global.f32</code>.</p></div>
+    <div data-panel="add" hidden><h2>One call, one instruction</h2><p>The registration of <code>add.f32</code> declares which operands it reads and writes and supplies the PTX template.</p></div>
+    <div data-panel="st" hidden><h2>One call, one instruction</h2><p>The store becomes exactly one <code>st.global.f32</code>.</p></div>
+  </div>
+</main>
+</body>
+</html>

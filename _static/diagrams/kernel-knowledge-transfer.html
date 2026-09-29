@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reusing a triangular inversion strategy across kernels</title>
+<link rel="stylesheet" href="diagrams.css"><script src="diagrams.js" defer></script>
+<style>
+  h2 { margin: 0 0 12px; font-size: 16px; }
+  h3 { margin: 0 0 10px; font-size: 14px; }
+  .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .example { padding: 12px; border: 1px solid var(--tone); border-radius: 6px; background: var(--surface); }
+  .math { margin-bottom: 12px; font-size: 16px; }
+  .matrix-note { display: grid; grid-template-columns: 128px 1fr; gap: 12px; align-items: center; font-size: 12px; }
+  .matrix-note p + p { margin-top: 12px; }
+  .matrix { width: 128px; border-collapse: collapse; text-align: center; font-size: 12px; }
+  .matrix td { width: 32px; height: 28px; padding: 0; border: 1px solid var(--border); }
+  .matrix .lower { background: var(--tint); }
+  .matrix .diagonal { background: var(--soft); }
+  .matrix .zero { color: var(--muted); }
+  .matrix caption { caption-side: bottom; padding-top: 5px; color: var(--muted); font-size: 11px; }
+  .conclusion { margin: 12px 0 0; text-align: center; }
+  .conclusion strong { margin-right: 0; }
+  .transfer { margin: 14px 0 0; }
+  .transfer .flow-node { background: var(--tint, var(--soft)); border-color: var(--tone, var(--border)); }
+  .transfer small + small { margin-top: 6px; }
+  @media (max-width: 660px) {
+    .comparison, .transfer { grid-template-columns: 1fr; }
+    .transfer .flow-node:not(:last-child)::after { content: '↓'; right: 50%; top: auto; bottom: -21px; transform: translateX(50%); }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h2>Shared matrix structure makes an implementation strategy reusable</h2>
+  <div class="comparison">
+    <section class="example blue">
+      <h3>Gated DeltaNet · scalar decay</h3>
+      <p class="math">L<sub>ij</sub> = β<sub>i</sub> γ<sub>ij</sub> (k<sub>i</sub><sup>T</sup> k<sub>j</sub>)</p>
+      <div class="matrix-note">
+        <table class="matrix" aria-label="Gated DeltaNet unit-lower-triangular matrix"><caption>4-token sketch</caption><tbody></tbody></table>
+        <div><p>One shared decay factor across all key channels</p><p>M = I + L</p></div>
+      </div>
+    </section>
+    <section class="example amber">
+      <h3>Kimi Delta Attention · channel-wise decay</h3>
+      <p class="math">L<sub>ij</sub> = β<sub>i</sub> k<sub>i</sub><sup>T</sup> diag(<b>γ</b><sub>ij</sub>) k<sub>j</sub></p>
+      <div class="matrix-note">
+        <table class="matrix" aria-label="Kimi Delta Attention unit-lower-triangular matrix"><caption>4-token sketch</caption><tbody></tbody></table>
+        <div><p>A separate decay factor per key channel</p><p>M = I + L</p></div>
+      </div>
+    </section>
+  </div>
+  <p class="legend">k: normalized key; β: update weight; γ<sub>ij</sub>: decay accumulated over tokens j + 1, …, i. Only earlier tokens contribute: j &lt; i.</p>
+  <div class="band conclusion">Different coefficients; the same unit-lower-triangular solve <strong>M X = R</strong>.</div>
+  <div class="flow transfer" aria-label="Transfer the inversion strategy">
+    <div class="flow-node blue">
+      <strong>Gated DeltaNet implementation</strong>
+      <small>Invert 8×8 diagonal blocks; merge into 16×16, 32×32, then 64×64.</small>
+    </div>
+    <div class="flow-node">
+      <strong>Reusable strategy</strong>
+      <small>Block inversion uses the triangular structure shared by both systems.</small>
+    </div>
+    <div class="flow-node amber">
+      <strong>Kimi Delta Attention implementation</strong>
+      <small>Reuse the merge steps with this operator's coefficients.</small>
+      <small>Adapt block sizes and operand types.</small>
+    </div>
+  </div>
+</main>
+<script>
+document.querySelectorAll('.matrix tbody').forEach(matrix => {
+  for (let i = 1; i <= 4; i++) {
+    const row = matrix.insertRow();
+    for (let j = 1; j <= 4; j++) {
+      const cell = row.insertCell();
+      cell.className = i > j ? 'lower' : i === j ? 'diagonal' : 'zero';
+      cell.innerHTML = i > j ? `L<sub>${i}${j}</sub>` : i === j ? '1' : '0';
+    }
+  }
+});
+</script>
+</body>
+</html>

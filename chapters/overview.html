@@ -1,0 +1,538 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" data-theme="auto">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Overview &#8212; Agentic GPU Programming for MLSys</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "auto";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "auto";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/book.css?v=fde79067" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=a5fa425f"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'chapters/overview';</script>
+    <script src="../_static/book-tabs.js?v=3241ad90"></script>
+    <script src="../_static/fold-code.js?v=cc72803f"></script>
+    <link rel="canonical" href="https://mlc.ai/agentic-gpu-programming-for-mlsys/chapters/overview.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Domain-specific Compiler Analysis" href="analysis.html" />
+    <link rel="prev" title="Agentic GPU Programming for MLSys" href="../index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="auto">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/mlc-logo-with-text-landscape.svg" class="logo__image only-light" alt="Agentic GPU Programming for MLSys - Home"/>
+    <script>document.write(`<img src="../_static/mlc-logo-with-text-landscape.svg" class="logo__image only-dark" alt="Agentic GPU Programming for MLSys - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Part I, Elements of Agentic GPU Programming</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">Domain-specific Compiler Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="knowledge.html">Knowledge Base for Agents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarking.html">Benchmarking and Profiling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="agent-workflows.html">Agent Workflows</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Part II, TIRx Harness Overview</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="harness.html">Introduction to TIRx Harness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tirx-compiler-foundation.html">TIRx Compiler Foundation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kcoral.html">KCoral Benchmark Server</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Part III, Agentic GPU Programming in Action</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="running-agent-workflows.html">Running Agent Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compiler-analysis-deepdive.html">Compiler Analysis Deep Dive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmark-server-deepdive.html">Benchmark Server Deep Dive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="self-improvement.html">Review and Harness Improvement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced-tips.html">Advanced Tips</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+<a href="https://github.com/mlc-ai/agentic-gpu-programming-for-mlsys" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Overview</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#components-of-agentic-gpu-programming">Components of Agentic GPU Programming</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compiler-foundation">Compiler Foundation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#domain-specific-compiler-analysis">Domain-specific Compiler Analysis</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#knowledge-base">Knowledge Base</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#benchmarking-and-profiling">Benchmarking and Profiling</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#agent-workflows">Agent Workflows</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#connecting-the-components">Connecting the Components</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="overview">
+<h1>Overview<a class="headerlink" href="#overview" title="Link to this heading">#</a></h1>
+<p>Machine learning systems rely on GPU kernels for training and serving, so
+making these kernels faster can reduce the time and resources needed to run
+a model. Achieving these gains, however, requires an iterative engineering
+process: exploring implementations, drawing on hardware knowledge and
+existing code, and refining the result through debugging and measurement.
+As coding agents become more capable, they can take on more of this work.</p>
+<p>Yet much of an agent’s effort can go into work around the optimization
+itself: predicting how kernel code will be lowered to hardware behavior,
+diagnosing timing-dependent failures or measurements distorted by concurrent
+GPU activity, and finding an implementation or optimization strategy
+relevant to the task. This reduces token efficiency: the agent spends its
+budget resolving these uncertainties, leaving less room to explore
+optimizations. Otherwise viable optimizations may never be reached within
+a practical search budget.</p>
+<p>These are not simply search problems that can be solved by asking the agent
+to try more variants. They point to missing pieces in the development
+environment: a predictable programming foundation, tools for reasoning
+beyond a single execution, reusable implementation knowledge, and controlled
+evaluation. Taken together, they amount to a need for a compiler-based
+environment built for agents – we will use the term <strong>compiler harness</strong> to
+name it.</p>
+<p>As agentic programming shifts more of the work from writing code to shaping
+the environment in which agents operate, we expect this harness to become
+increasingly important. This framing is inspired by concurrent efforts in
+AI-oriented system design. <a class="reference external" href="https://arxiv.org/abs/2608.12629">CAKE</a> makes
+compiler–agent co-design explicit, including a self-evolving program
+representation that supports verification and diagnostics.
+<a class="reference external" href="https://x.com/cdleary/article/2094878051238887834">OpenAI’s Jalapeño</a>
+reflects a related full-stack principle: designing the programming target
+itself to be clear and predictable enough for AI to optimize effectively.</p>
+<figure id="agentic-harness-diagram" class="interactive-figure">
+  <iframe src="../_static/diagrams/agentic-harness.html" title="Components of an agentic compiler harness" class="diagram-frame" height="430"></iframe>
+  <figcaption>Click a component to see how the agent uses it and what it returns.</figcaption>
+</figure><p>In this chapter, we will describe the components of agentic GPU programming
+and how a compiler harness and agent workflows fit together.</p>
+<section id="components-of-agentic-gpu-programming">
+<h2>Components of Agentic GPU Programming<a class="headerlink" href="#components-of-agentic-gpu-programming" title="Link to this heading">#</a></h2>
+<p>Agentic GPU programming brings together a compiler foundation,
+domain-specific compiler analysis, a knowledge base, benchmarking and
+profiling, and agent workflows. The first four form the compiler harness;
+agent workflows coordinate how agents use it over an optimization run.</p>
+<section id="compiler-foundation">
+<h3>Compiler Foundation<a class="headerlink" href="#compiler-foundation" title="Link to this heading">#</a></h3>
+<p>An agent needs a way to express and compile kernels with a clear connection
+between source code and GPU operations. A compiler harness can build on a
+minimal, stable intermediate representation (IR) that makes operations,
+memory accesses, and synchronization explicit. Keeping the IR small gives
+agents fewer concepts to reason about, while stable semantics preserve the
+meaning of programs across compiler updates. The IR should also be extensible
+to hardware primitives, so new instructions and synchronization mechanisms
+can be added as hardware evolves.</p>
+</section>
+<section id="domain-specific-compiler-analysis">
+<h3>Domain-specific Compiler Analysis<a class="headerlink" href="#domain-specific-compiler-analysis" title="Link to this heading">#</a></h3>
+<p>A failed test may tell an agent that a kernel is wrong without explaining
+which operation caused the failure. Some errors may appear only under
+particular inputs or execution orders. Domain-specific compiler analysis uses
+the program’s structure and GPU execution semantics to reason about its
+behavior beyond an individual test run. The resulting diagnostics should
+explain what went wrong and identify the relevant program operations.</p>
+</section>
+<section id="knowledge-base">
+<h3>Knowledge Base<a class="headerlink" href="#knowledge-base" title="Link to this heading">#</a></h3>
+<p>Knowing that tiling or pipelining can improve performance does not tell an
+agent how to implement it for a particular operator and GPU. A knowledge base
+supplies complete kernels that show how algorithms, data layouts, and
+schedules fit together. Hardware and instruction-set documentation explain
+the operations available and their conditions of use. Together, these
+sources let the agent find a concrete strategy and understand how to adapt it.</p>
+</section>
+<section id="benchmarking-and-profiling">
+<h3>Benchmarking and Profiling<a class="headerlink" href="#benchmarking-and-profiling" title="Link to this heading">#</a></h3>
+<p>A timing improvement may reflect a better kernel, but it may also reflect
+interference from other GPU work or state left by an earlier experiment. A
+reliable benchmark needs controlled execution conditions and consistent
+rules for correctness checks and timing measurements so that candidates can
+be compared. Profiling complements these measurements by showing where time
+is spent and how hardware resources are used. This helps the agent identify
+performance bottlenecks and decide which parts of the kernel to optimize.</p>
+</section>
+<section id="agent-workflows">
+<h3>Agent Workflows<a class="headerlink" href="#agent-workflows" title="Link to this heading">#</a></h3>
+<p>An optimization task often takes many experiments and agent turns. An
+agent workflow coordinates this work: it determines how tasks are
+assigned, how work continues across turns, and when a run stops. Within that
+workflow, agents use the compiler harness to find relevant knowledge,
+implement kernels, and obtain correctness and performance feedback.</p>
+<p>The compiler harness can compose with different agent workflows. Each can
+use the same knowledge, tools, and evaluation interfaces.</p>
+</section>
+</section>
+<section id="connecting-the-components">
+<h2>Connecting the Components<a class="headerlink" href="#connecting-the-components" title="Link to this heading">#</a></h2>
+<p>The workflow coordinates the optimization process, and the compiler harness
+supplies the capabilities agents use throughout it.</p>
+<p>Within the workflow, an agent retrieves knowledge to form a strategy,
+expresses it as a candidate kernel, and uses program analysis to investigate
+defects. It also checks correctness and measures performance on the target
+GPU, using profiling to understand the results. These interactions give the
+agent the information needed to repair a candidate, investigate a bottleneck,
+or try another approach. The workflow carries the task forward across
+experiments and agent turns.
+Across runs, validated kernels can enrich the knowledge base, while problems
+exposed during optimization guide improvements to the analysis tools and harness.</p>
+<p>The following chapters develop these elements in turn:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="analysis.html"><span class="std std-doc">Domain-specific Compiler Analysis</span></a> shows how an analysis
+reasons about a kernel beyond a single execution and reports which
+operations are responsible for a defect.</p></li>
+<li><p><a class="reference internal" href="knowledge.html"><span class="std std-doc">Knowledge Base for Agents</span></a> describes how reusable kernels and
+hardware documentation are organized so that an agent can find a strategy
+and adapt it to the operator and GPU at hand.</p></li>
+<li><p><a class="reference internal" href="benchmarking.html"><span class="std std-doc">Benchmarking and Profiling</span></a> covers the controlled
+execution and measurement rules that make candidates comparable, and the
+profiling that shows where a kernel spends its time.</p></li>
+<li><p><a class="reference internal" href="agent-workflows.html"><span class="std std-doc">Agent Workflows</span></a> explains how agent workflows compose
+with the compiler harness.</p></li>
+</ul>
+<p>The compiler foundation makes a kernel analyzable, keeps curated kernels in
+a form an agent can reuse, and compiles each candidate just in time. Part II
+introduces one instance of such a foundation, which supplies the examples
+used throughout the rest of the book.</p>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Agentic GPU Programming for MLSys</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="analysis.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Domain-specific Compiler Analysis</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#components-of-agentic-gpu-programming">Components of Agentic GPU Programming</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compiler-foundation">Compiler Foundation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#domain-specific-compiler-analysis">Domain-specific Compiler Analysis</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#knowledge-base">Knowledge Base</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#benchmarking-and-profiling">Benchmarking and Profiling</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#agent-workflows">Agent Workflows</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#connecting-the-components">Connecting the Components</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By TIRx Contributors
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2026, TIRx Contributors.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

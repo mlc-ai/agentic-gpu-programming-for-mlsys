@@ -1,0 +1,665 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" data-theme="auto">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Compiler Analysis Deep Dive &#8212; Agentic GPU Programming for MLSys</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "auto";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "auto";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/book.css?v=fde79067" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=a5fa425f"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'chapters/compiler-analysis-deepdive';</script>
+    <script src="../_static/book-tabs.js?v=3241ad90"></script>
+    <script src="../_static/fold-code.js?v=cc72803f"></script>
+    <link rel="canonical" href="https://mlc.ai/agentic-gpu-programming-for-mlsys/chapters/compiler-analysis-deepdive.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Benchmark Server Deep Dive" href="benchmark-server-deepdive.html" />
+    <link rel="prev" title="Running Agent Workflows" href="running-agent-workflows.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="auto">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/mlc-logo-with-text-landscape.svg" class="logo__image only-light" alt="Agentic GPU Programming for MLSys - Home"/>
+    <script>document.write(`<img src="../_static/mlc-logo-with-text-landscape.svg" class="logo__image only-dark" alt="Agentic GPU Programming for MLSys - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Part I, Elements of Agentic GPU Programming</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">Domain-specific Compiler Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="knowledge.html">Knowledge Base for Agents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarking.html">Benchmarking and Profiling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="agent-workflows.html">Agent Workflows</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Part II, TIRx Harness Overview</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="harness.html">Introduction to TIRx Harness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tirx-compiler-foundation.html">TIRx Compiler Foundation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kcoral.html">KCoral Benchmark Server</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Part III, Agentic GPU Programming in Action</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="running-agent-workflows.html">Running Agent Workflows</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Compiler Analysis Deep Dive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmark-server-deepdive.html">Benchmark Server Deep Dive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="self-improvement.html">Review and Harness Improvement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced-tips.html">Advanced Tips</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+<a href="https://github.com/mlc-ai/agentic-gpu-programming-for-mlsys" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Compiler Analysis Deep Dive</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#calling-the-analyses">Calling the Analyses</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#case-study-feedback-in-the-kimi-delta-attention-run">Case Study: Feedback in the Kimi Delta Attention Run</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="compiler-analysis-deep-dive">
+<h1>Compiler Analysis Deep Dive<a class="headerlink" href="#compiler-analysis-deep-dive" title="Link to this heading">#</a></h1>
+<p>The last chapter showed how to carry out agentic GPU programming with the
+TIRx Harness. In this chapter, we will take a deep dive and review how an
+agent interacts with Synccheck and Racecheck over one specific run.</p>
+<p>A hang or a race can survive many GPU runs before it shows up, so the agent
+needs feedback that does not depend on timing. Synccheck and Racecheck supply
+it: they analyze a kernel on the CPU, on concrete inputs, and report
+synchronization and data-race findings against its source lines. Both tools
+build on NumSim, the CPU simulation foundation that models the kernel’s
+operations and memory behavior.</p>
+<figure class="interactive-figure">
+  <iframe src="../_static/diagrams/analysis-feedback.html" title="Program in, report out" class="diagram-frame" height="640"></iframe>
+  <figcaption>Synccheck and Racecheck analyze kernels with concrete inputs and return reports that point to source lines. Pick a checker, then switch between the buggy and the fixed program.</figcaption>
+</figure><section id="calling-the-analyses">
+<h2>Calling the Analyses<a class="headerlink" href="#calling-the-analyses" title="Link to this heading">#</a></h2>
+<p>To check its own kernels as often as it edits them, the agent calls the
+checkers directly from its scripts. Both checkers are Python functions in
+<code class="docutils literal notranslate"><span class="pre">tirx_harness</span></code> that take a TIRx <code class="docutils literal notranslate"><span class="pre">PrimFunc</span></code> and concrete values for its arguments.
+A TIRx-lite kernel exposes this representation as <code class="docutils literal notranslate"><span class="pre">kernel.func</span></code>. The
+producer-overtaking kernel in the Synccheck figure has a single argument,
+an output array of <code class="docutils literal notranslate"><span class="pre">ROUNDS</span></code> integers, and calls Synccheck like this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">tirx_harness</span><span class="w"> </span><span class="kn">import</span> <span class="n">racecheck</span><span class="p">,</span> <span class="n">synccheck</span>
+
+<span class="n">report</span> <span class="o">=</span> <span class="n">synccheck</span><span class="p">(</span><span class="n">kernel</span><span class="o">.</span><span class="n">func</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="p">{</span><span class="s2">"out"</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ROUNDS</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)})</span>
+<span class="n">report</span><span class="o">.</span><span class="n">print</span><span class="p">()</span>           <span class="c1"># findings with source excerpts</span>
+<span class="n">report</span><span class="o">.</span><span class="n">verdict</span>           <span class="c1"># "clean", "review", "incomplete", or "error"</span>
+<span class="n">report</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>         <span class="c1"># structured evidence</span>
+<span class="n">report</span><span class="o">.</span><span class="n">require_clean</span><span class="p">()</span>   <span class="c1"># raise unless the verdict is "clean"</span>
+</pre></div>
+</div>
+<p>In the Kimi Delta Attention run, the agents met all four verdicts:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Verdict</p></th>
+<th class="head"><p>Examples from the run</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">error</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">deadlock</span></code>, <code class="docutils literal notranslate"><span class="pre">mbarrier_arrive_before_consumption</span></code>, <code class="docutils literal notranslate"><span class="pre">setmaxnreg_incomplete_warpgroup</span></code>, <code class="docutils literal notranslate"><span class="pre">data_race</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">incomplete</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">missing_input_bindings</span></code>: the adapter did not bind every kernel argument</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">review</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">uninitialized_read</span></code>: a TMEM read of bytes never written</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">clean</span></code></p></td>
+<td><p>No finding for this kernel and these inputs</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>For a real kernel, the agent writes a small adapter script that builds such
+inputs. The script below, <code class="docutils literal notranslate"><span class="pre">check_sync.py</span></code>, is condensed from the one the agent
+wrote for its first Kimi Delta Attention candidate. It loads the candidate, creates random
+tensors at a tiny sequence length, builds the TMA descriptors, and runs either
+checker:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">"""Pre-GPU Synccheck / Racecheck for the fused KDA kernel on a small launch."""</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tirx_harness</span><span class="w"> </span><span class="kn">import</span> <span class="n">synccheck</span><span class="p">,</span> <span class="n">racecheck</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tirx_harness.numsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">TensorMap</span>
+
+<span class="n">which</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">"sync"</span>
+<span class="n">T</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="k">else</span> <span class="mi">128</span>
+<span class="n">H</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="k">else</span> <span class="mi">1</span>
+
+<span class="n">q</span> <span class="o">=</span> <span class="n">bf16_bits</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">((</span><span class="n">T</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">D</span><span class="p">))</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span>
+<span class="o">...</span>
+<span class="n">s0</span> <span class="o">=</span> <span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">((</span><span class="n">H</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">D</span><span class="p">))</span> <span class="o">*</span> <span class="mf">0.25</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="n">o</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">T</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">D</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">tmap</span><span class="p">(</span><span class="n">base</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">TensorMap</span><span class="p">(</span>
+        <span class="n">base</span><span class="o">=</span><span class="n">base</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">global_shape</span><span class="o">=</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">H</span><span class="p">),</span> <span class="n">global_strides</span><span class="o">=</span><span class="p">(</span><span class="n">H</span> <span class="o">*</span> <span class="n">D</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">D</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="n">box_shape</span><span class="o">=</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">element_strides</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">"bfloat16"</span><span class="p">,</span> <span class="n">swizzle</span><span class="o">=</span><span class="s2">"128B"</span><span class="p">,</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+
+<span class="n">inputs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="o">...</span><span class="p">,</span> <span class="n">q_map</span><span class="o">=</span><span class="n">tmap</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="n">k_map</span><span class="o">=</span><span class="n">tmap</span><span class="p">(</span><span class="n">k</span><span class="p">),</span> <span class="n">v_map</span><span class="o">=</span><span class="n">tmap</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="n">o_map</span><span class="o">=</span><span class="n">tmap</span><span class="p">(</span><span class="n">o</span><span class="p">),</span>
+              <span class="n">scale</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">D</span><span class="p">)))</span>
+<span class="n">kern</span> <span class="o">=</span> <span class="n">mod</span><span class="o">.</span><span class="n">build_kernel</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">H</span><span class="p">)</span>
+<span class="n">report</span> <span class="o">=</span> <span class="p">(</span><span class="n">synccheck</span> <span class="k">if</span> <span class="n">which</span> <span class="o">==</span> <span class="s2">"sync"</span> <span class="k">else</span> <span class="n">racecheck</span><span class="p">)(</span><span class="n">kern</span><span class="o">.</span><span class="n">func</span><span class="p">,</span> <span class="n">inputs</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">which</span><span class="si">}</span><span class="s2"> T=</span><span class="si">{</span><span class="n">T</span><span class="si">}</span><span class="s2"> H=</span><span class="si">{</span><span class="n">H</span><span class="si">}</span><span class="s2"> verdict=</span><span class="si">{</span><span class="n">report</span><span class="o">.</span><span class="n">verdict</span><span class="si">}</span><span class="s2"> in </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">t0</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">s"</span><span class="p">)</span>
+<span class="n">report</span><span class="o">.</span><span class="n">print</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Each check took about half a minute on the CPU and needed no GPU, so the agent
+ran both in the background on every change to synchronization, alongside its
+GPU tests. Later, the agents copied the same script for each new candidate
+and added <code class="docutils literal notranslate"><span class="pre">require_clean()</span></code>, so that a non-clean verdict failed the command.</p>
+<p>The launch has to be long enough to exercise every stage of the pipeline,
+including reuse of each ring slot. The agent recorded its rule in its notes
+early in the run:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>T=320 (5 chunks) runs in ~30 s each and exercised ring wrap-around; both must be clean before benchmarking.
+</pre></div>
+</div>
+<p>When a later candidate added arguments that the adapter did not bind, both
+checkers returned <code class="docutils literal notranslate"><span class="pre">incomplete</span></code>, and the next agent concluded that “the
+earlier H=96 checker attempts were incomplete because their adapters omitted
+the new scratch arguments, so they are not evidence.”</p>
+</section>
+<section id="case-study-feedback-in-the-kimi-delta-attention-run">
+<h2>Case Study: Feedback in the Kimi Delta Attention Run<a class="headerlink" href="#case-study-feedback-in-the-kimi-delta-attention-run" title="Link to this heading">#</a></h2>
+<p>The examples above showed how the agent prepares inputs, calls the checkers,
+and reads their verdicts. We now follow what happens after a finding arrives:
+the agent traces it back to the kernel, makes a repair, and runs the checkers
+again. In this stretch of the Kimi Delta Attention run, each repair allows
+the analysis to proceed further, until both checkers return clean reports.
+The trace includes the agent’s commands, the checkers’ output, its notes,
+and its edits. Output excerpts keep only the key lines; <code class="docutils literal notranslate"><span class="pre">...</span></code> marks omitted
+text.</p>
+<p>The kernel is the agent’s first fused candidate. Preprocessing warps compute
+gates and operand tiles, an MMA warp issues the matrix instructions,
+state-keeper warps carry the recurrence, and a store warp writes the output;
+they hand data to one another through barriers and ring buffers. The kernel
+has passed a small GPU correctness test, and its official benchmark is
+running on the server.</p>
+<p>The agent starts both checkers through <code class="docutils literal notranslate"><span class="pre">check_sync.py</span></code> in the background, on a
+launch of two chunks:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>check_sync.py<span class="w"> </span>sync<span class="w"> </span><span class="m">128</span><span class="w"> </span><span class="m">1</span>
+python<span class="w"> </span>check_sync.py<span class="w"> </span>race<span class="w"> </span><span class="m">128</span><span class="w"> </span><span class="m">1</span>
+</pre></div>
+</div>
+<p>Both checkers report the same finding:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>sync T=128 H=1 verdict=error in 24.7s
+  [ERROR] mbarrier_prior_generation_consumption_not_happens_before: generation 0 consumption
+          does not happen before mbarrier.arrive on ... generation 1
+    Source: warp 8, source op #33346, loop iteration 1
+       897 |                 m_o.arrive(0)
+    Related: warp 14, source op #45975, loop iteration 0
+      1055 |                 m_o.wait(0, st_o.phase)
+race T=128 H=1 verdict=error in 30.3s
+  [ERROR] mbarrier_prior_generation_consumption_not_happens_before: ...
+</pre></div>
+</div>
+<blockquote>
+<div><p><strong>Agent:</strong> Both checkers confirm the O-staged barrier <code class="docutils literal notranslate"><span class="pre">m_o</span></code> lacks
+back-pressure, risking a parity miss if the state keeper outruns the store
+warp. I’ll fix it by making it a 2-stage barrier indexed by the V/O slot,
+then re-run both checkers including a 5-chunk launch to test ring
+wrap-around.</p>
+</div></blockquote>
+<p>It edits the kernel:</p>
+<div class="highlight-diff notranslate"><div class="highlight"><pre><span></span><span class="gd">-        m_o = txl.MBarrier(smem, 1)</span>
+<span class="gi">+        m_o = txl.MBarrier(smem, 2)  # one generation per V/O slot; p_v.empty back-pressures it</span>
+<span class="w"> </span>        m_o.init(128)
+<span class="w"> </span>...
+<span class="w"> </span>                txl.ptx[FENCE_ASYNC]()
+<span class="gd">-                m_o.arrive(0)</span>
+<span class="gi">+                m_o.arrive(st_v.stage)</span>
+<span class="w"> </span>                st_v.advance()
+<span class="w"> </span>...
+<span class="gd">-            st_o = txl.PipelineState(1, phase=0)</span>
+<span class="w"> </span>            st_vo = txl.PipelineState(2, phase=0)
+<span class="w"> </span>...
+<span class="gd">-                m_o.wait(0, st_o.phase)</span>
+<span class="gd">-                st_o.advance()</span>
+<span class="gi">+                m_o.wait(st_vo.stage, st_vo.phase)</span>
+</pre></div>
+</div>
+<p>The agent reruns both checkers on five chunks, enough to wrap around every
+ring:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>check_sync.py<span class="w"> </span>sync<span class="w"> </span><span class="m">320</span><span class="w"> </span><span class="m">1</span>
+python<span class="w"> </span>check_sync.py<span class="w"> </span>race<span class="w"> </span><span class="m">320</span><span class="w"> </span><span class="m">1</span>
+</pre></div>
+</div>
+<p>Synccheck is clean, but Racecheck reports a race between the MMA warp and a
+preprocessing warp:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>sync T=320 H=1 verdict=clean in 25.1s
+synccheck CLEAN - 0 finding(s); ... 81 verifier states / 1245 verifier transitions
+race T=320 H=1 verdict=error in 31.7s
+  [ERROR] data_race: unordered read/write on allocation#0:[68608, 68612) ...
+          memory ordering failure: no async-&gt;generic proxy bridge from shared::cta to shared::cta
+          orders the accesses
+    Prior: warp 13, source op #37098, loop iteration 0: ... [tirx.ptx.tcgen05_mma_ts]
+    Current: warp 2, source op #4287, loop iteration 2
+       697 |                     txl.ptx.st.shared.b32(kev.ptr_to(t, col0), ow)
+</pre></div>
+</div>
+<blockquote>
+<div><p><strong>Agent:</strong> Racecheck flags one remaining issue: no async-to-generic proxy
+bridge between the MMA’s async-proxy read of the Kend slot and a later
+generic write, even though synccheck’s mbarrier handshake is fine. I’ll
+check the “proxy bridge” rule in the NumSim semantics docs and compare it
+against how the GDN kernel orders its analogous <code class="docutils literal notranslate"><span class="pre">s_ainv</span></code>
+generic-write-after-MMA-read path, along with the benchmark log.</p>
+</div></blockquote>
+<p>It searches the checker’s documentation for the rule and reads the section it
+points to:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>- observed TCGEN commit/wait completion closes the tracked asynchronous work
+  and publishes its ordinary completion clock, but does **not** publish an
+  implicit generic-async proxy bridge;
+</pre></div>
+</div>
+<blockquote>
+<div><p><strong>Agent:</strong> I’ll add the required <code class="docutils literal notranslate"><span class="pre">fence.proxy.async</span></code> after the Kend slot and
+T/Bt stage waits to satisfy Racecheck’s rule on reused shared slots, along
+with IKET range annotations for profiling right after the benchmark result.</p>
+</div></blockquote>
+<p>It edits the kernel:</p>
+<div class="highlight-diff notranslate"><div class="highlight"><pre><span></span><span class="w"> </span>                b_kend_empty.wait(st_kend.stage, st_kend.phase)
+<span class="gi">+                txl.ptx[FENCE_ASYNC]()  # STATE MMA (async proxy) read this Kend slot; order before generic overwrite</span>
+<span class="w"> </span>                kv = s_k[st_k.stage]
+<span class="w"> </span>...
+<span class="w"> </span>                p_prep.empty.wait(st_prep.stage, st_prep.phase)
+<span class="gi">+                txl.ptx[FENCE_ASYNC]()  # NV/QKV MMAs read this T/Bt stage; order before generic overwrite</span>
+<span class="w"> </span>                b_beta_full.wait(st_tok.stage, st_tok.phase)
+</pre></div>
+</div>
+<p>The agent reruns both checkers:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>check_sync.py<span class="w"> </span>race<span class="w"> </span><span class="m">320</span><span class="w"> </span><span class="m">1</span>
+python<span class="w"> </span>check_sync.py<span class="w"> </span>sync<span class="w"> </span><span class="m">320</span><span class="w"> </span><span class="m">1</span>
+</pre></div>
+</div>
+<p>Synccheck is still clean, and Racecheck reports a second race, this time
+between a state-keeper warp and a preprocessing warp:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>sync T=320 H=1 verdict=clean in 25.3s
+race T=320 H=1 verdict=error in 30.3s
+  [ERROR] data_race: unordered read/write on allocation#0:[219648, 219652) ...
+          execution ordering failure: no synchronization edge orders the actors
+    Prior: warp 8, source op #22936, loop iteration 0
+       859 |                         txl.ptx["ld.shared.v4.f32"](
+    Current: warp 0, source op #3886, loop iteration 2
+       661 |                     txl.ptx["st.shared.v2.f32"](txl.address_of(s_gam[pstage, col0]), gm0, gm1)
+</pre></div>
+</div>
+<blockquote>
+<div><p><strong>Agent:</strong> Racecheck caught a real ordering bug: prep writes chunk c+2’s
+decay vector into a ring slot before waiting for its release, letting a
+prep running two chunks ahead clobber data the state keeper still needs.
+I’ll fix this by moving the stage-empty wait and proxy fence to the top of
+prep’s chunk loop, then re-run both checkers.</p>
+</div></blockquote>
+<p>It edits the kernel:</p>
+<div class="highlight-diff notranslate"><div class="highlight"><pre><span></span><span class="w"> </span>            with txl.serial(NC) as c:
+<span class="w"> </span>                pstage = st_prep.stage
+<span class="gi">+                # The prep stage (s_gam, s_t, s_bt, s_e) is free once QKV(c-2) committed.</span>
+<span class="gi">+                p_prep.empty.wait(st_prep.stage, st_prep.phase)</span>
+<span class="gi">+                txl.ptx[FENCE_ASYNC]()  # NV/QKV MMAs read this T/Bt stage; order before generic overwrite</span>
+<span class="w"> </span>...
+<span class="gd">-                p_prep.empty.wait(st_prep.stage, st_prep.phase)</span>
+<span class="gd">-                txl.ptx[FENCE_ASYNC]()  # NV/QKV MMAs read this T/Bt stage; order before generic overwrite</span>
+<span class="w"> </span>                b_beta_full.wait(st_tok.stage, st_tok.phase)
+</pre></div>
+</div>
+<p>The agent reruns both checkers once more:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>check_sync.py<span class="w"> </span>race<span class="w"> </span><span class="m">320</span><span class="w"> </span><span class="m">1</span>
+python<span class="w"> </span>check_sync.py<span class="w"> </span>sync<span class="w"> </span><span class="m">320</span><span class="w"> </span><span class="m">1</span>
+</pre></div>
+</div>
+<p>Both are clean:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>race T=320 H=1 verdict=clean in 31.4s
+=== racecheck CLEAN ===
+race conflicts checked in global, shared, tmem
+native phase kda_fwd: 514516 semantic memory access(es)
+sync T=320 H=1 verdict=clean in 25.1s
+synccheck CLEAN - 0 finding(s); ... 81 verifier states / 1245 verifier transitions
+</pre></div>
+</div>
+<blockquote>
+<div><p><strong>Agent:</strong> Both checkers are now clean on the 5-chunk launch. The official
+benchmark of the first version just finished too — let me read it.</p>
+</div></blockquote>
+<p>Four runs of each checker and three edits took under ten minutes, all on the
+CPU, while the official benchmark of the first version was still running.</p>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="running-agent-workflows.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Running Agent Workflows</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="benchmark-server-deepdive.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Benchmark Server Deep Dive</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#calling-the-analyses">Calling the Analyses</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#case-study-feedback-in-the-kimi-delta-attention-run">Case Study: Feedback in the Kimi Delta Attention Run</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By TIRx Contributors
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2026, TIRx Contributors.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
