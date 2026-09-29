@@ -176,7 +176,7 @@
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Part III, Agentic GPU Programming in Action</span></p>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="running-agent-workflows.html">Running Agent Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="launching-the-agent.html">Launching the Agent</a></li>
 <li class="toctree-l1"><a class="reference internal" href="compiler-analysis-deepdive.html">Compiler Analysis Deep Dive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="benchmark-server-deepdive.html">Benchmark Server Deep Dive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="self-improvement.html">Review and Harness Improvement</a></li>
@@ -351,7 +351,7 @@ the other.</p>
 <figure class="interactive-figure">
   <iframe src="../_static/diagrams/kernel-knowledge-transfer.html" title="Reusing a triangular inversion strategy across kernels" class="diagram-frame" height="490"></iframe>
   <figcaption>The two operators produce different coefficients but share a unit-lower-triangular system. This structure lets an agent transfer the block inversion strategy from Gated DeltaNet to Kimi Delta Attention.</figcaption>
-</figure><p>The <a class="extlink-kernels reference external" href="https://github.com/mlc-ai/TIRx-kernels/blob/main/tirx_kernels/flashinfer/gdn_prefill/gdn_prefill_sm100.py">Gated DeltaNet prefill kernel</a>
+</figure><p>The <a class="extlink-kernels reference external" href="https://github.com/mlc-ai/TIRx-kernels/blob/main/tirx_kernels/ported/flashinfer/gdn_prefill/gdn_prefill_sm100.py">Gated DeltaNet prefill kernel</a>
 inverts this system hierarchically, merging 8×8 diagonal inverses into 16×16,
 32×32, and 64×64 blocks with warp-level MMA. These merge steps depend on the
 triangular structure, so they also apply to the system in Kimi Delta
@@ -359,7 +359,7 @@ Attention. An agent can reuse the hierarchical inversion strategy while
 adapting block sizes and operand types to its target kernel.</p>
 <p>A reference can also contribute a single instruction choice, even when its
 operator has different mathematics.
-For example, the <a class="extlink-kernels reference external" href="https://github.com/mlc-ai/TIRx-kernels/blob/main/tirx_kernels/deepgemm/tf32_hc_prenorm_gemm.py">DeepGEMM TF32 prenorm GEMM port</a>
+For example, the <a class="extlink-kernels reference external" href="https://github.com/mlc-ai/TIRx-kernels/blob/main/tirx_kernels/ported/deepgemm/tf32_hc_prenorm_gemm.py">DeepGEMM TF32 prenorm GEMM port</a>
 passes different L2 cache policies to its TMA loads: <code class="docutils literal notranslate"><span class="pre">evict_first</span></code> for the
 left matrix operand and <code class="docutils literal notranslate"><span class="pre">evict_last</span></code> for the right. These load sites show how
 to give different data different retention priorities in L2. An agent can

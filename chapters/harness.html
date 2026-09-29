@@ -176,7 +176,7 @@
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Part III, Agentic GPU Programming in Action</span></p>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="running-agent-workflows.html">Running Agent Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="launching-the-agent.html">Launching the Agent</a></li>
 <li class="toctree-l1"><a class="reference internal" href="compiler-analysis-deepdive.html">Compiler Analysis Deep Dive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="benchmark-server-deepdive.html">Benchmark Server Deep Dive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="self-improvement.html">Review and Harness Improvement</a></li>
@@ -337,7 +337,8 @@ can inspect.</p>
 <h2>A Knowledge Base of Implementations and Hardware References<a class="headerlink" href="#a-knowledge-base-of-implementations-and-hardware-references" title="Link to this heading">#</a></h2>
 <p>A compiler foundation makes hardware strategies expressible, but an agent
 also needs implementation knowledge. TIRx Harness includes a knowledge base
-of kernel implementations and hardware documentation. Its kernel zoo contains
+of kernel implementations and hardware documentation. Its
+<a class="reference external" href="https://github.com/mlc-ai/TIRx-kernels">kernel zoo</a> contains
 concrete TIRx implementations that show how algorithms, layouts, and schedules
 fit together, including ports from established GPU libraries:</p>
 <div class="pst-scrollable-table-container"><table class="table">
@@ -347,13 +348,13 @@ fit together, including ports from established GPU libraries:</p>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><a class="extlink-kernels reference external" href="https://github.com/mlc-ai/TIRx-kernels/blob/main/tirx_kernels/flashattention/flash_attention4.py">FlashAttention-4 forward</a></p></td>
+<tr class="row-even"><td><p><a class="extlink-kernels reference external" href="https://github.com/mlc-ai/TIRx-kernels/blob/main/tirx_kernels/ported/flashattention/flash_attention4.py">FlashAttention-4 forward</a></p></td>
 <td><p>FlashAttention</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="extlink-kernels reference external" href="https://github.com/mlc-ai/TIRx-kernels/blob/main/tirx_kernels/deepgemm/fp8_gemm_1d1d.py">Dense FP8/FP4 matrix multiplication</a></p></td>
+<tr class="row-odd"><td><p><a class="extlink-kernels reference external" href="https://github.com/mlc-ai/TIRx-kernels/blob/main/tirx_kernels/ported/deepgemm/fp8_gemm_1d1d.py">Dense FP8/FP4 matrix multiplication</a></p></td>
 <td><p>DeepGEMM</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="extlink-kernels reference external" href="https://github.com/mlc-ai/TIRx-kernels/blob/main/tirx_kernels/flashinfer/gdn_prefill/gdn_prefill_sm100.py">Gated DeltaNet prefill</a></p></td>
+<tr class="row-even"><td><p><a class="extlink-kernels reference external" href="https://github.com/mlc-ai/TIRx-kernels/blob/main/tirx_kernels/ported/flashinfer/gdn_prefill/gdn_prefill_sm100.py">Gated DeltaNet prefill</a></p></td>
 <td><p>FlashInfer</p></td>
 </tr>
 </tbody>

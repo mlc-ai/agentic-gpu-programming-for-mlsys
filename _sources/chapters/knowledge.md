@@ -68,7 +68,7 @@ the other.
 </figure>
 ```
 
-The {kernels}`Gated DeltaNet prefill kernel <flashinfer/gdn_prefill/gdn_prefill_sm100.py>`
+The {kernels}`Gated DeltaNet prefill kernel <ported/flashinfer/gdn_prefill/gdn_prefill_sm100.py>`
 inverts this system hierarchically, merging 8×8 diagonal inverses into 16×16,
 32×32, and 64×64 blocks with warp-level MMA. These merge steps depend on the
 triangular structure, so they also apply to the system in Kimi Delta
@@ -77,7 +77,7 @@ adapting block sizes and operand types to its target kernel.
 
 A reference can also contribute a single instruction choice, even when its
 operator has different mathematics.
-For example, the {kernels}`DeepGEMM TF32 prenorm GEMM port <deepgemm/tf32_hc_prenorm_gemm.py>`
+For example, the {kernels}`DeepGEMM TF32 prenorm GEMM port <ported/deepgemm/tf32_hc_prenorm_gemm.py>`
 passes different L2 cache policies to its TMA loads: `evict_first` for the
 left matrix operand and `evict_last` for the right. These load sites show how
 to give different data different retention priorities in L2. An agent can

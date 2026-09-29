@@ -170,5 +170,5 @@ and instrumentation can affect execution costs.
 Together, the compiler foundation and KCoral connect source changes to GPU
 results: the agent can express a candidate, submit an experiment, and inspect
 the returned measurements and artifacts. Part III begins with a
-[running optimization workflow](running-agent-workflows.md) that uses these capabilities,
+[running optimization workflow](launching-the-agent.md) that uses these capabilities,
 then examines the analysis and benchmark feedback in more detail.

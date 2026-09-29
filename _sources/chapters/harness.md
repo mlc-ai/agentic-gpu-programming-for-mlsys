@@ -48,15 +48,16 @@ can inspect.
 
 A compiler foundation makes hardware strategies expressible, but an agent
 also needs implementation knowledge. TIRx Harness includes a knowledge base
-of kernel implementations and hardware documentation. Its kernel zoo contains
+of kernel implementations and hardware documentation. Its
+[kernel zoo](https://github.com/mlc-ai/TIRx-kernels) contains
 concrete TIRx implementations that show how algorithms, layouts, and schedules
 fit together, including ports from established GPU libraries:
 
 | Kernel in the zoo | Ported from |
 |---|---|
-| {kernels}`FlashAttention-4 forward <flashattention/flash_attention4.py>` | FlashAttention |
-| {kernels}`Dense FP8/FP4 matrix multiplication <deepgemm/fp8_gemm_1d1d.py>` | DeepGEMM |
-| {kernels}`Gated DeltaNet prefill <flashinfer/gdn_prefill/gdn_prefill_sm100.py>` | FlashInfer |
+| {kernels}`FlashAttention-4 forward <ported/flashattention/flash_attention4.py>` | FlashAttention |
+| {kernels}`Dense FP8/FP4 matrix multiplication <ported/deepgemm/fp8_gemm_1d1d.py>` | DeepGEMM |
+| {kernels}`Gated DeltaNet prefill <ported/flashinfer/gdn_prefill/gdn_prefill_sm100.py>` | FlashInfer |
 
 Preserving complete implementations keeps their dataflow, synchronization,
 and workload assumptions available for inspection. This context is easy to
