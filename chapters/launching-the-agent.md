@@ -1,6 +1,6 @@
-# Running Agent Workflows
+# Launching the Agent
 
-Part I introduced the compiler harness and the [agent workflows](agent-workflows.md)
+Part I introduced the compiler harness and the agent workflows
 that organize an optimization search; Part II described how TIRx Harness provides the
 programming and evaluation tools. We now bring them together to optimize the
 forward pass of Kimi Delta Attention on a B200 GPU, for one sequence of

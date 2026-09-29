@@ -74,7 +74,7 @@ chapters/kcoral
 :caption: Part III, Agentic GPU Programming in Action
 :maxdepth: 1
 
-chapters/running-agent-workflows
+chapters/launching-the-agent
 chapters/compiler-analysis-deepdive
 chapters/benchmark-server-deepdive
 chapters/self-improvement
