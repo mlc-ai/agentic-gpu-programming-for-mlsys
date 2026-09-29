@@ -98,10 +98,9 @@ python evolution/setup.py --task kda_forward_b1_t8192_h96 \
   --remote "$KCORAL_URL"
 ```
 
-The run's `.venv` uses the Python interpreter that launched setup, with harness
-and benchmark dependencies installed from `uv.lock`. The run directory
-contains `PROMPT.md`, `manifest.json`,
-`flowverse.yaml`, and `worktree/`; candidate kernels will live under
+The run's `.venv` uses the Python interpreter that launched setup. The run
+directory contains `PROMPT.md`, `manifest.json`, `flowverse.yaml`, and
+`worktree/`; candidate kernels will live under
 `candidates/kda/forward_b1_t8192_h96/` in that worktree.
 
 Set `run_dir` to the absolute path printed by setup, enter the worktree, and
