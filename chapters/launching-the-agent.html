@@ -44,6 +44,8 @@
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=a5fa425f"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>window.MathJax = {"loader": {"load": ["[tex]/textmacros"]}, "tex": {"packages": {"[+]": ["textmacros"]}}, "options": {"enableMenu": false, "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}, "svg": {"fontCache": "local"}}</script>
+    <script defer="defer" src="../_static/mathjax/tex-svg.js?v=50970ec6"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'chapters/launching-the-agent';</script>
     <script src="../_static/book-tabs.js?v=3241ad90"></script>
     <script src="../_static/fold-code.js?v=cc72803f"></script>
@@ -280,6 +282,7 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-task-grouped-gemm">The Task: Grouped GEMM</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prepare-the-environment">Prepare the Environment</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#prepare-the-harness-checkout">Prepare the harness checkout</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#start-kcoral-on-the-gpu-server">Start KCoral on the GPU server</a></li>
@@ -302,11 +305,20 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="launching-the-agent">
 <h1>Launching the Agent<a class="headerlink" href="#launching-the-agent" title="Link to this heading">#</a></h1>
-<p>Part I introduced the compiler harness and the agent workflows
+<p>Part I introduced the compiler harness and the <a class="reference internal" href="agent-workflows.html"><span class="std std-doc">agent workflows</span></a>
 that organize an optimization search; Part II described how TIRx Harness provides the
 programming and evaluation tools. We now bring them together to optimize the
-forward pass of Kimi Delta Attention on a B200 GPU, for one sequence of
-8,192 tokens with 96 heads.</p>
+M-grouped contiguous FP8 GEMM on a B200 GPU. The agent implements and
+optimizes the kernel in TIRx, using DeepGEMM as the correctness reference
+and performance baseline.</p>
+<p>We start with Grouped GEMM, using DeepGEMM as the baseline, because its simpler
+computation makes it easier to get started and quickly see performance improve
+through successive optimization iterations. Starting with the next chapter’s
+Synccheck and Racecheck examples, we switch to a recorded Kimi Delta Attention
+(KDA) run. KDA’s greater complexity lets us demonstrate more of the harness’s
+capabilities, including correctness checks, synchronization analysis, and
+profiling feedback, and how they help the agent diagnose problems and improve
+performance. The workflow introduced here carries over to that task.</p>
 <p>In this chapter, we will prepare the task workspace and GPU evaluation
 service, check the baseline, and launch the optimization run using either
 goal mode or Flame Chase. Once the run starts, the chosen workflow carries
@@ -317,25 +329,33 @@ as shown below.</p>
   <figcaption>The workflow coordinates agents across turns; the compiler harness supplies the knowledge, tools, and feedback they use. Click a component to inspect its role.</figcaption>
 </figure><p>During the run, the agent retrieves relevant implementations, writes candidate
 kernels, and submits them for analysis and GPU evaluation. The returned
-feedback guides its next experiment. We begin by preparing the environment
-in which this work will take place.</p>
+feedback guides its next experiment. We first define the task, then prepare
+the environment in which this work will take place.</p>
+<section id="the-task-grouped-gemm">
+<h2>The Task: Grouped GEMM<a class="headerlink" href="#the-task-grouped-gemm" title="Link to this heading">#</a></h2>
+<p>Grouped GEMM computes <span class="math notranslate nohighlight">\(D_g = A_g B_g^\mathsf{T}\)</span> for groups with different
+row counts, as in mixture-of-experts models. We use the M-grouped contiguous
+layout with FP8 operands and BF16 output. The task covers four configurations
+with 4 or 8 groups and different matrix dimensions.</p>
+<p>The agent implements and optimizes this operation in TIRx. The harness fixes
+the inputs and correctness checks and measures performance against DeepGEMM.</p>
+</section>
 <section id="prepare-the-environment">
 <h2>Prepare the Environment<a class="headerlink" href="#prepare-the-environment" title="Link to this heading">#</a></h2>
 <p>An agentic run needs a place for the agent to work and a GPU for its
-experiments, both ready before the agent starts. This example optimizes
-Kimi Delta Attention forward on a B200 with <code class="docutils literal notranslate"><span class="pre">B=1</span></code>,
-<code class="docutils literal notranslate"><span class="pre">T=8192</span></code>, <code class="docutils literal notranslate"><span class="pre">H=96</span></code>, and <code class="docutils literal notranslate"><span class="pre">K=V=128</span></code>. We use two machines: one runs the coding
-agent, and the other is a GPU server running KCoral to execute kernels and
-collect measurements. The agent and KCoral can also run on the same machine.</p>
+experiments, both ready before the agent starts. We use two machines: one
+runs the coding agent, and the other is a GPU server running KCoral to
+execute kernels and collect measurements. The agent and KCoral can also run on the same machine.</p>
 <p>First, we will clone the harness and start KCoral on the GPU server. On the
 agent machine, <code class="docutils literal notranslate"><span class="pre">evolution/setup.py</span></code> then creates a task worktree and Python
 environment with the required packages, skills, and prompt. We will check the
 baseline through KCoral before launching the agent in that worktree.</p>
 <section id="prepare-the-harness-checkout">
 <h3>Prepare the harness checkout<a class="headerlink" href="#prepare-the-harness-checkout" title="Link to this heading">#</a></h3>
-<p>Use Linux x86_64, Python 3.12 or 3.13, and pip 25.1+ on both machines.
-The agent machine needs <code class="docutils literal notranslate"><span class="pre">uv</span></code>, Rust 1.89+ with Cargo, C/C++ build tools, and
-Python development headers; the GPU server needs CUDA and a compatible driver.
+<p>Use Linux x86_64 (glibc 2.38 or newer), Python 3.12 or 3.13, and pip 25.1+
+on both machines. The agent machine needs <code class="docutils literal notranslate"><span class="pre">uv</span></code>, Rust 1.89+ with Cargo,
+C/C++ build tools, and Python development headers; the GPU server needs
+CUDA Toolkit 13.2 and a compatible driver.
 For profiling, install Nsight Compute on both machines.</p>
 <p>Clone the harness where the agent runs and on the GPU server. If they share
 one machine, a single checkout is enough:</p>
@@ -375,8 +395,8 @@ with the server’s hostname or IP address; use <code class="docutils literal no
 curl<span class="w"> </span>--fail<span class="w"> </span><span class="s2">"</span><span class="nv">$KCORAL_URL</span><span class="s2">/health"</span>
 </pre></div>
 </div>
-<p>Then prepare the fixed-shape task:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>evolution/setup.py<span class="w"> </span>--task<span class="w"> </span>kda_forward_b1_t8192_h96<span class="w"> </span><span class="se">\</span>
+<p>Then prepare the task:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>evolution/setup.py<span class="w"> </span>--task<span class="w"> </span>grouped_gemm_fp8<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--remote<span class="w"> </span><span class="s2">"</span><span class="nv">$KCORAL_URL</span><span class="s2">"</span>
 </pre></div>
 </div>
@@ -384,7 +404,7 @@ curl<span class="w"> </span>--fail<span class="w"> </span><span class="s2">"</sp
 the installed <code class="docutils literal notranslate"><span class="pre">tirx-harness</span></code> wheel. The run directory contains <code class="docutils literal notranslate"><span class="pre">PROMPT.md</span></code>,
 <code class="docutils literal notranslate"><span class="pre">manifest.json</span></code>, <code class="docutils literal notranslate"><span class="pre">flowverse.yaml</span></code>, and
 <code class="docutils literal notranslate"><span class="pre">worktree/</span></code>; candidate kernels will live under
-<code class="docutils literal notranslate"><span class="pre">candidates/kda/forward_b1_t8192_h96/</span></code> in that worktree.</p>
+<code class="docutils literal notranslate"><span class="pre">candidates/grouped_gemm/fp8/</span></code> in that worktree.</p>
 <p>Set <code class="docutils literal notranslate"><span class="pre">run_dir</span></code> to the absolute path printed by setup, enter the worktree, and
 activate its environment:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">run_dir</span><span class="o">=</span>/absolute/path/printed/as/run_dir
@@ -396,8 +416,8 @@ cat<span class="w"> </span><span class="s2">"</span><span class="nv">$run_dir</s
 <p><code class="docutils literal notranslate"><span class="pre">PROMPT.md</span></code> combines the task definition with this run’s worktree path,
 service address, benchmark command, authoring rules, and candidate-recording
 instructions. The prompt asks the agent to make the kernel as fast as possible
-while preserving correctness. Chunking, fusion, layouts, warp roles, and
-pipelining remain the agent’s choices.</p>
+while preserving correctness. Tile sizes, group scheduling, layouts, warp roles,
+and pipelining remain the agent’s choices.</p>
 </section>
 <section id="check-the-baseline">
 <h3>Check the baseline<a class="headerlink" href="#check-the-baseline" title="Link to this heading">#</a></h3>
@@ -405,25 +425,25 @@ pipelining remain the agent’s choices.</p>
 <code class="docutils literal notranslate"><span class="pre">CANDIDATE</span></code> replaced by <code class="docutils literal notranslate"><span class="pre">baseline</span></code>. For this task and remote execution mode,
 it has this form:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>evolution/remote/kcoral_remote.py<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>candidates/kda/forward_b1_t8192_h96<span class="w"> </span>baseline<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>candidates/grouped_gemm/fp8<span class="w"> </span>baseline<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--remote<span class="w"> </span><span class="s2">"</span><span class="nv">$KCORAL_URL</span><span class="s2">"</span><span class="w"> </span>--timeout<span class="w"> </span><span class="m">600</span>
 </pre></div>
 </div>
-<p>Confirm that the output includes the timed row <code class="docutils literal notranslate"><span class="pre">kda-fwd-h96-fixed</span></code>, seven
-stress probes, and two fp64 probes, all at the required H=96, T=8192 shape.
-The final summary must report <code class="docutils literal notranslate"><span class="pre">passed:</span> <span class="pre">10/10</span></code>; individual rows also print
-<code class="docutils literal notranslate"><span class="pre">passed:</span> <span class="pre">1/1</span></code>. The private holdout result is reported separately. For this
-first call, the candidate is FlashKDA itself, the performance baseline; later
-calls time each passing candidate against it in the same call.</p>
+<p>Confirm that the summary reports <code class="docutils literal notranslate"><span class="pre">passed:</span> <span class="pre">4/4</span></code>. Every group’s valid output
+rows must pass the correctness check for every configuration; alignment
+padding is excluded. For this first call, the candidate is DeepGEMM itself,
+the performance baseline. Later calls compare each passing TIRx candidate
+against DeepGEMM on the same quantized inputs, with preparation and compilation
+outside timing. Each workload reports <code class="docutils literal notranslate"><span class="pre">DeepGEMM</span> <span class="pre">time</span> <span class="pre">/</span> <span class="pre">candidate</span> <span class="pre">time</span></code>;
+the summary includes the geometric mean across all four workloads.</p>
 </section>
 </section>
 <section id="kick-off-agentic-runs">
 <h2>Kick Off Agentic Runs<a class="headerlink" href="#kick-off-agentic-runs" title="Link to this heading">#</a></h2>
 <p>An optimization run lasts many turns, so the agent needs a launcher that keeps
 it working toward the goal instead of stopping after one answer. Start the run
-in the prepared worktree with its environment active. All launch
-options use the same generated task, correctness checks, benchmark, and
-candidate directory.</p>
+in <code class="docutils literal notranslate"><span class="pre">$run_dir/worktree</span></code> with the harness environment active. All launch
+options use the same task prompt, correctness checks, and benchmark.</p>
 <div class="launch-tabs docutils container">
 <div class="launch-tablist" aria-label="Choose how to launch the agentic run" hidden>
   <button type="button" id="tab-goal-mode" aria-controls="goal-mode">Goal mode</button>
@@ -463,15 +483,18 @@ benchmark reports. Ask it to periodically summarize the best passing result,
 recent experiments, current optimization direction, and any issues needing
 attention, with evidence from those records.</p>
 <p>In the generated worktree, open <code class="docutils literal notranslate"><span class="pre">frontier/index.json</span></code> under
-<code class="docutils literal notranslate"><span class="pre">candidates/kda/forward_b1_t8192_h96/</span></code> for the retained candidates and their
-benchmark results.</p>
+<code class="docutils literal notranslate"><span class="pre">candidates/grouped_gemm/fp8/</span></code> for the retained
+candidates and their benchmark results.</p>
 </section>
 <section id="continuing-through-part-iii">
 <h2>Continuing Through Part III<a class="headerlink" href="#continuing-through-part-iii" title="Link to this heading">#</a></h2>
-<p>The next two chapters follow analysis and performance feedback from a
-recorded Kimi Delta Attention run to show how the agent diagnoses errors and
-improves its kernels. The remaining chapters turn to reviewing results,
-improving the harness, and keeping future searches productive:</p>
+<p>With the Grouped GEMM workflow in place, we now turn to the recorded KDA
+case study. Beginning with Synccheck and Racecheck in the next chapter, we
+follow concrete diagnostics, the agent’s responses, and the measurements
+that guide further optimization. These examples come from the KDA run, not
+the Grouped GEMM run you just prepared. The remaining chapters turn to
+reviewing results, improving the harness, and keeping future searches
+productive:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="compiler-analysis-deepdive.html"><span class="std std-doc">Compiler Analysis Deep Dive</span></a> follows
 how the agent calls the analyses, interprets their findings, and repairs
@@ -534,6 +557,7 @@ alternatives, managing temporary artifacts, and intervening when needed.</p></li
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-task-grouped-gemm">The Task: Grouped GEMM</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prepare-the-environment">Prepare the Environment</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#prepare-the-harness-checkout">Prepare the harness checkout</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#start-kcoral-on-the-gpu-server">Start KCoral on the GPU server</a></li>

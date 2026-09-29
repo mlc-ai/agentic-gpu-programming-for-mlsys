@@ -1,10 +1,20 @@
 # Launching the Agent
 
-Part I introduced the compiler harness and the agent workflows
+Part I introduced the compiler harness and the [agent workflows](agent-workflows.md)
 that organize an optimization search; Part II described how TIRx Harness provides the
 programming and evaluation tools. We now bring them together to optimize the
-forward pass of Kimi Delta Attention on a B200 GPU, for one sequence of
-8,192 tokens with 96 heads.
+M-grouped contiguous FP8 GEMM on a B200 GPU. The agent implements and
+optimizes the kernel in TIRx, using DeepGEMM as the correctness reference
+and performance baseline.
+
+We start with Grouped GEMM, using DeepGEMM as the baseline, because its simpler
+computation makes it easier to get started and quickly see performance improve
+through successive optimization iterations. Starting with the next chapter's
+Synccheck and Racecheck examples, we switch to a recorded Kimi Delta Attention
+(KDA) run. KDA's greater complexity lets us demonstrate more of the harness's
+capabilities, including correctness checks, synchronization analysis, and
+profiling feedback, and how they help the agent diagnose problems and improve
+performance. The workflow introduced here carries over to that task.
 
 In this chapter, we will prepare the task workspace and GPU evaluation
 service, check the baseline, and launch the optimization run using either
@@ -21,17 +31,25 @@ as shown below.
 
 During the run, the agent retrieves relevant implementations, writes candidate
 kernels, and submits them for analysis and GPU evaluation. The returned
-feedback guides its next experiment. We begin by preparing the environment
-in which this work will take place.
+feedback guides its next experiment. We first define the task, then prepare
+the environment in which this work will take place.
+
+## The Task: Grouped GEMM
+
+Grouped GEMM computes $D_g = A_g B_g^\mathsf{T}$ for groups with different
+row counts, as in mixture-of-experts models. We use the M-grouped contiguous
+layout with FP8 operands and BF16 output. The task covers four configurations
+with 4 or 8 groups and different matrix dimensions.
+
+The agent implements and optimizes this operation in TIRx. The harness fixes
+the inputs and correctness checks and measures performance against DeepGEMM.
 
 ## Prepare the Environment
 
 An agentic run needs a place for the agent to work and a GPU for its
-experiments, both ready before the agent starts. This example optimizes
-Kimi Delta Attention forward on a B200 with `B=1`,
-`T=8192`, `H=96`, and `K=V=128`. We use two machines: one runs the coding
-agent, and the other is a GPU server running KCoral to execute kernels and
-collect measurements. The agent and KCoral can also run on the same machine.
+experiments, both ready before the agent starts. We use two machines: one
+runs the coding agent, and the other is a GPU server running KCoral to
+execute kernels and collect measurements. The agent and KCoral can also run on the same machine.
 
 First, we will clone the harness and start KCoral on the GPU server. On the
 agent machine, `evolution/setup.py` then creates a task worktree and Python
@@ -40,9 +58,10 @@ baseline through KCoral before launching the agent in that worktree.
 
 ### Prepare the harness checkout
 
-Use Linux x86_64, Python 3.12 or 3.13, and pip 25.1+ on both machines.
-The agent machine needs `uv`, Rust 1.89+ with Cargo, C/C++ build tools, and
-Python development headers; the GPU server needs CUDA and a compatible driver.
+Use Linux x86_64 (glibc 2.38 or newer), Python 3.12 or 3.13, and pip 25.1+
+on both machines. The agent machine needs `uv`, Rust 1.89+ with Cargo,
+C/C++ build tools, and Python development headers; the GPU server needs
+CUDA Toolkit 13.2 and a compatible driver.
 For profiling, install Nsight Compute on both machines.
 
 Clone the harness where the agent runs and on the GPU server. If they share
@@ -90,10 +109,10 @@ export KCORAL_URL="http://gpu-server:8000"
 curl --fail "$KCORAL_URL/health"
 ```
 
-Then prepare the fixed-shape task:
+Then prepare the task:
 
 ```bash
-python evolution/setup.py --task kda_forward_b1_t8192_h96 \
+python evolution/setup.py --task grouped_gemm_fp8 \
   --remote "$KCORAL_URL"
 ```
 
@@ -101,7 +120,7 @@ The run's `.venv` uses the Python interpreter that launched setup and includes
 the installed `tirx-harness` wheel. The run directory contains `PROMPT.md`,
 `manifest.json`, `flowverse.yaml`, and
 `worktree/`; candidate kernels will live under
-`candidates/kda/forward_b1_t8192_h96/` in that worktree.
+`candidates/grouped_gemm/fp8/` in that worktree.
 
 Set `run_dir` to the absolute path printed by setup, enter the worktree, and
 activate its environment:
@@ -116,8 +135,8 @@ cat "$run_dir/PROMPT.md"
 `PROMPT.md` combines the task definition with this run's worktree path,
 service address, benchmark command, authoring rules, and candidate-recording
 instructions. The prompt asks the agent to make the kernel as fast as possible
-while preserving correctness. Chunking, fusion, layouts, warp roles, and
-pipelining remain the agent's choices.
+while preserving correctness. Tile sizes, group scheduling, layouts, warp roles,
+and pipelining remain the agent's choices.
 
 ### Check the baseline
 
@@ -127,24 +146,24 @@ it has this form:
 
 ```bash
 python evolution/remote/kcoral_remote.py \
-  candidates/kda/forward_b1_t8192_h96 baseline \
+  candidates/grouped_gemm/fp8 baseline \
   --remote "$KCORAL_URL" --timeout 600
 ```
 
-Confirm that the output includes the timed row `kda-fwd-h96-fixed`, seven
-stress probes, and two fp64 probes, all at the required H=96, T=8192 shape.
-The final summary must report `passed: 10/10`; individual rows also print
-`passed: 1/1`. The private holdout result is reported separately. For this
-first call, the candidate is FlashKDA itself, the performance baseline; later
-calls time each passing candidate against it in the same call.
+Confirm that the summary reports `passed: 4/4`. Every group's valid output
+rows must pass the correctness check for every configuration; alignment
+padding is excluded. For this first call, the candidate is DeepGEMM itself,
+the performance baseline. Later calls compare each passing TIRx candidate
+against DeepGEMM on the same quantized inputs, with preparation and compilation
+outside timing. Each workload reports `DeepGEMM time / candidate time`;
+the summary includes the geometric mean across all four workloads.
 
 ## Kick Off Agentic Runs
 
 An optimization run lasts many turns, so the agent needs a launcher that keeps
 it working toward the goal instead of stopping after one answer. Start the run
-in the prepared worktree with its environment active. All launch
-options use the same generated task, correctness checks, benchmark, and
-candidate directory.
+in `$run_dir/worktree` with the harness environment active. All launch
+options use the same task prompt, correctness checks, and benchmark.
 
 ::::{container} launch-tabs
 ```{raw} html
@@ -202,15 +221,18 @@ recent experiments, current optimization direction, and any issues needing
 attention, with evidence from those records.
 
 In the generated worktree, open `frontier/index.json` under
-`candidates/kda/forward_b1_t8192_h96/` for the retained candidates and their
-benchmark results.
+`candidates/grouped_gemm/fp8/` for the retained
+candidates and their benchmark results.
 
 ## Continuing Through Part III
 
-The next two chapters follow analysis and performance feedback from a
-recorded Kimi Delta Attention run to show how the agent diagnoses errors and
-improves its kernels. The remaining chapters turn to reviewing results,
-improving the harness, and keeping future searches productive:
+With the Grouped GEMM workflow in place, we now turn to the recorded KDA
+case study. Beginning with Synccheck and Racecheck in the next chapter, we
+follow concrete diagnostics, the agent's responses, and the measurements
+that guide further optimization. These examples come from the KDA run, not
+the Grouped GEMM run you just prepared. The remaining chapters turn to
+reviewing results, improving the harness, and keeping future searches
+productive:
 
 - [Compiler Analysis Deep Dive](compiler-analysis-deepdive.md) follows
   how the agent calls the analyses, interprets their findings, and repairs

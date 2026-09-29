@@ -295,9 +295,11 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="compiler-analysis-deep-dive">
 <h1>Compiler Analysis Deep Dive<a class="headerlink" href="#compiler-analysis-deep-dive" title="Link to this heading">#</a></h1>
-<p>The last chapter showed how to carry out agentic GPU programming with the
-TIRx Harness. In this chapter, we will take a deep dive and review how an
-agent interacts with Synccheck and Racecheck over one specific run.</p>
+<p>The last chapter introduced the agent workflow through Grouped GEMM, using
+DeepGEMM as the baseline. Starting here, we switch to a recorded Kimi Delta
+Attention (KDA) run: its more complex kernel lets us explore the harness’s
+analysis tools in greater depth. This chapter follows how the agent uses
+Synccheck and Racecheck to diagnose and fix synchronization errors and data races.</p>
 <p>A hang or a race can survive many GPU runs before it shows up, so the agent
 needs feedback that does not depend on timing. Synccheck and Racecheck supply
 it: they analyze a kernel on the CPU, on concrete inputs, and report
