@@ -33,6 +33,11 @@ Kimi Delta Attention forward on a B200 with `B=1`,
 agent, and the other is a GPU server running KCoral to execute kernels and
 collect measurements. The agent and KCoral can also run on the same machine.
 
+First, we will clone the harness and start KCoral on the GPU server. On the
+agent machine, `evolution/setup.py` then creates a task worktree and Python
+environment with the required packages, skills, and prompt. We will check the
+baseline through KCoral before launching the agent in that worktree.
+
 ### Prepare the harness checkout
 
 Use Linux x86_64, Python 3.12 or 3.13, and pip 25.1+ on both machines.
@@ -49,8 +54,8 @@ cd TIRx-harness
 git submodule update --init thirdparty/tvm-rust-ext
 ```
 
-On the agent machine, install the setup dependencies in the Python environment
-you will use to launch setup, from the repository root:
+From the checkout root on the agent machine, install the dependencies for
+`evolution/setup.py`:
 
 ```bash
 python -m pip install -r evolution/preparation/requirements.txt
@@ -93,10 +98,9 @@ python evolution/setup.py --task kda_forward_b1_t8192_h96 \
   --remote "$KCORAL_URL"
 ```
 
-Setup creates a worktree and `.venv` using the Python interpreter that launched
-it, then installs the harness and benchmark dependencies from `uv.lock` and
-prepares the skills, references, and task prompt. This also applies when the
-GPU is remote. The run directory contains `PROMPT.md`, `manifest.json`,
+The run's `.venv` uses the Python interpreter that launched setup, with harness
+and benchmark dependencies installed from `uv.lock`. The run directory
+contains `PROMPT.md`, `manifest.json`,
 `flowverse.yaml`, and `worktree/`; candidate kernels will live under
 `candidates/kda/forward_b1_t8192_h96/` in that worktree.
 
