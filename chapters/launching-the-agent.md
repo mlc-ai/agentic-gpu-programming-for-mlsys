@@ -35,15 +35,10 @@ collect measurements. The agent and KCoral can also run on the same machine.
 
 ### Prepare the harness checkout
 
-This example follows the harness's
-{harness}`registered-workload setup <docs/optimization-runs.md>`, which builds
-the harness in each run's environment. Use Linux x86_64 with Python 3.12 or
-3.13 and pip 25.1 or later. The agent machine also needs `uv`, Rust 1.89.0 or
-later with Cargo, and the C/C++ build tools and Python development headers
-listed in the {harness}`source-build prerequisites <docs/installation.md#build-from-source>`.
-Install the CUDA Toolkit wherever kernels are compiled, and a compatible
-NVIDIA driver on the GPU server. NCU captures need Nsight Compute on the
-server; reading the returned reports also needs `ncu` on the agent machine.
+Use Linux x86_64, Python 3.12 or 3.13, and pip 25.1+ on both machines.
+The agent machine needs `uv`, Rust 1.89+ with Cargo, C/C++ build tools, and
+Python development headers; the GPU server needs CUDA and a compatible driver.
+For profiling, install Nsight Compute on both machines.
 
 Clone the harness where the agent runs and on the GPU server. If they share
 one machine, a single checkout is enough:
