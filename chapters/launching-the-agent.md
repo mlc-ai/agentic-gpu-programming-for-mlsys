@@ -7,13 +7,14 @@ M-grouped contiguous FP8 GEMM on a B200 GPU. The agent implements and
 optimizes the kernel in TIRx, using DeepGEMM as the correctness reference
 and performance baseline.
 
-We use Grouped GEMM here to help you get started quickly: a focused workload
-with a straightforward computation lets you run the workflow and see results
-before working through a more involved kernel. Starting with
-the next chapter's Synccheck and Racecheck examples, we switch to a recorded
-Kimi Delta Attention (KDA) run to examine the agent's use of analysis and
-performance feedback in detail. The workflow introduced here carries over
-to that task.
+We start with Grouped GEMM, using DeepGEMM as the baseline, because its simpler
+computation makes it easier to get started and quickly see performance improve
+through successive optimization iterations. Starting with the next chapter's
+Synccheck and Racecheck examples, we switch to a recorded Kimi Delta Attention
+(KDA) run. KDA's greater complexity lets us demonstrate more of the harness's
+capabilities, including correctness checks, synchronization analysis, and
+profiling feedback, and how they help the agent diagnose problems and improve
+performance. The workflow introduced here carries over to that task.
 
 In this chapter, we will prepare the task workspace and GPU evaluation
 service, check the baseline, and launch the optimization run using either
