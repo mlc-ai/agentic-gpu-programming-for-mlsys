@@ -49,9 +49,8 @@ Clone the harness where the agent runs and on the GPU server. If they share
 one machine, a single checkout is enough:
 
 ```bash
-git clone https://github.com/mlc-ai/TIRx-harness.git
+git clone --recursive https://github.com/mlc-ai/TIRx-harness.git
 cd TIRx-harness
-git submodule update --init thirdparty/tvm-rust-ext
 ```
 
 From the checkout root on the agent machine, install the dependencies for
