@@ -281,7 +281,7 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prepare-the-environment">Prepare the Environment</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#install-the-harness">Install the harness</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#prepare-the-harness-checkout">Prepare the harness checkout</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#start-kcoral-on-the-gpu-server">Start KCoral on the GPU server</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#create-the-run-on-the-agent-machine">Create the run on the agent machine</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#check-the-baseline">Check the baseline</a></li>
@@ -327,20 +327,25 @@ Kimi Delta Attention forward on a B200 with <code class="docutils literal notran
 <code class="docutils literal notranslate"><span class="pre">T=8192</span></code>, <code class="docutils literal notranslate"><span class="pre">H=96</span></code>, and <code class="docutils literal notranslate"><span class="pre">K=V=128</span></code>. We use two machines: one runs the coding
 agent, and the other is a GPU server running KCoral to execute kernels and
 collect measurements. The agent and KCoral can also run on the same machine.</p>
-<section id="install-the-harness">
-<h3>Install the harness<a class="headerlink" href="#install-the-harness" title="Link to this heading">#</a></h3>
-<p>The environment running the agent needs Python, Rust, and <code class="docutils literal notranslate"><span class="pre">uv</span></code>. The GPU server
-needs CUDA and, for NCU profiling, Nsight Compute.</p>
+<p>First, we will clone the harness and start KCoral on the GPU server. On the
+agent machine, <code class="docutils literal notranslate"><span class="pre">evolution/setup.py</span></code> then creates a task worktree and Python
+environment with the required packages, skills, and prompt. We will check the
+baseline through KCoral before launching the agent in that worktree.</p>
+<section id="prepare-the-harness-checkout">
+<h3>Prepare the harness checkout<a class="headerlink" href="#prepare-the-harness-checkout" title="Link to this heading">#</a></h3>
+<p>Use Linux x86_64, Python 3.12 or 3.13, and pip 25.1+ on both machines.
+The agent machine needs <code class="docutils literal notranslate"><span class="pre">uv</span></code>, Rust 1.89+ with Cargo, C/C++ build tools, and
+Python development headers; the GPU server needs CUDA and a compatible driver.
+For profiling, install Nsight Compute on both machines.</p>
 <p>Clone the harness where the agent runs and on the GPU server. If they share
 one machine, a single checkout is enough:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/mlc-ai/TIRx-harness.git
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>--recursive<span class="w"> </span>https://github.com/mlc-ai/TIRx-harness.git
 <span class="nb">cd</span><span class="w"> </span>TIRx-harness
-git<span class="w"> </span>submodule<span class="w"> </span>update<span class="w"> </span>--init<span class="w"> </span>thirdparty/tvm-rust-ext
 </pre></div>
 </div>
-<p>On the agent machine, install the harness in your existing Python environment
-from the repository root:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>.
+<p>From the checkout root on the agent machine, install the dependencies for
+<code class="docutils literal notranslate"><span class="pre">evolution/setup.py</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>evolution/preparation/requirements.txt
 </pre></div>
 </div>
 </section>
@@ -353,8 +358,8 @@ and server dependencies and start KCoral on GPU 0:</p>
 <p>KCoral executes arbitrary code. Allow only trusted clients on an isolated
 network; never expose the server to the public internet.</p>
 </div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--group<span class="w"> </span>benchmark<span class="w"> </span><span class="s1">'kcoral[server]'</span>
-python<span class="w"> </span>-m<span class="w"> </span>kcoral<span class="w"> </span>--gpus<span class="w"> </span><span class="m">0</span><span class="w"> </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span>--port<span class="w"> </span><span class="m">8000</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--group<span class="w"> </span>server
+python<span class="w"> </span>-m<span class="w"> </span>kcoral<span class="w"> </span>server<span class="w"> </span>--gpus<span class="w"> </span><span class="m">0</span><span class="w"> </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span>--port<span class="w"> </span><span class="m">8000</span>
 </pre></div>
 </div>
 <p>Leave this process running. If both roles use the same machine, open another
@@ -375,8 +380,9 @@ curl<span class="w"> </span>--fail<span class="w"> </span><span class="s2">"</sp
 <span class="w">  </span>--remote<span class="w"> </span><span class="s2">"</span><span class="nv">$KCORAL_URL</span><span class="s2">"</span>
 </pre></div>
 </div>
-<p>Setup creates a worktree with the required environment, skills, and task
-prompt. The run directory contains <code class="docutils literal notranslate"><span class="pre">PROMPT.md</span></code>, <code class="docutils literal notranslate"><span class="pre">manifest.json</span></code>, and
+<p>The run’s <code class="docutils literal notranslate"><span class="pre">.venv</span></code> uses the Python interpreter that launched setup and includes
+the installed <code class="docutils literal notranslate"><span class="pre">tirx-harness</span></code> wheel. The run directory contains <code class="docutils literal notranslate"><span class="pre">PROMPT.md</span></code>,
+<code class="docutils literal notranslate"><span class="pre">manifest.json</span></code>, <code class="docutils literal notranslate"><span class="pre">flowverse.yaml</span></code>, and
 <code class="docutils literal notranslate"><span class="pre">worktree/</span></code>; candidate kernels will live under
 <code class="docutils literal notranslate"><span class="pre">candidates/kda/forward_b1_t8192_h96/</span></code> in that worktree.</p>
 <p>Set <code class="docutils literal notranslate"><span class="pre">run_dir</span></code> to the absolute path printed by setup, enter the worktree, and
@@ -433,7 +439,8 @@ with a reproducibly passing kernel and retain it in the frontier.
 <p>The 3× speedup target is an example; choose a target that fits your task.</p>
 </div>
 <div class="launch-panel docutils container" id="flame-chase">
-<p>The harness environment includes Humanize. Run
+<p>Install Humanize separately using its
+<a class="reference external" href="https://github.com/humanfia/humanize#install">installation instructions</a>, then run
 <a class="reference external" href="https://docs.humanfia.ai/humanize/flows/flame-chase">Flame Chase</a>
 in the prepared terminal:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>hmz<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-f<span class="w"> </span><span class="s1">'git+https://github.com/humanfia/flowverse#flame_chase'</span><span class="w"> </span><span class="se">\</span>
@@ -528,7 +535,7 @@ alternatives, managing temporary artifacts, and intervening when needed.</p></li
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prepare-the-environment">Prepare the Environment</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#install-the-harness">Install the harness</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#prepare-the-harness-checkout">Prepare the harness checkout</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#start-kcoral-on-the-gpu-server">Start KCoral on the GPU server</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#create-the-run-on-the-agent-machine">Create the run on the agent machine</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#check-the-baseline">Check the baseline</a></li>
