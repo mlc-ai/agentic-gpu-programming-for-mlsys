@@ -80,7 +80,7 @@ python -m pip install -r evolution/preparation/requirements.txt
 ### Start KCoral on the GPU server
 
 In the GPU server's terminal, from the harness checkout, install the benchmark
-and server dependencies:
+and server dependencies, including DeepGEMM, and start KCoral on GPU 0:
 
 ```{warning}
 KCoral executes arbitrary code. Allow only trusted clients on an isolated
