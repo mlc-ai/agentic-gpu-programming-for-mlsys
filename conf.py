@@ -35,6 +35,16 @@ extlinks = {
 }
 
 html_theme = "sphinx_book_theme"
+templates_path = ["_templates"]
+html_sidebars = {
+    "**": [
+        "navbar-logo.html",
+        "book-title.html",
+        "icon-links.html",
+        "search-button-field.html",
+        "sbt-sidebar-nav.html",
+    ],
+}
 html_context = {"default_mode": "auto"}
 html_title = project
 html_baseurl = "https://mlc.ai/agentic-gpu-programming-for-mlsys/"
@@ -43,14 +53,14 @@ html_static_path = ["_static"]
 html_css_files = ["book.css"]
 html_js_files = ["book-tabs.js", "fold-code.js"]
 html_theme_options = {
-    "logo": {"link": "https://mlc.ai/"},
+    "logo": {"link": "https://mlc.ai/", "alt_text": "Machine Learning Compilation home"},
     "repository_url": "https://github.com/mlc-ai/agentic-gpu-programming-for-mlsys",
     "use_repository_button": True,
     "use_download_button": False,
     "use_fullscreen_button": False,
     "show_navbar_depth": 1,
     "show_toc_level": 2,
-    "home_page_in_toc": True,
+    "home_page_in_toc": False,
     "navbar_persistent": [],
 }
 html_show_sourcelink = True
