@@ -29,7 +29,7 @@ and we plan to integrate it into the
 Mellon University.
 
 This book is open source. Contributions, corrections, and examples are welcome
-through the [GitHub repository](https://github.com/mlc-ai/agentic-gpu-programming).
+through the [GitHub repository](https://github.com/mlc-ai/agentic-gpu-programming-for-mlsys).
 
 ## How This Book Is Organized
 
@@ -48,7 +48,8 @@ through the [GitHub repository](https://github.com/mlc-ai/agentic-gpu-programmin
   programming out end to end. It looks closely at the feedback the harness
   returns over the course of a run and at the interaction patterns between the
   agent and each element of the harness, and it closes with a few advanced
-  tips. Kimi Delta Attention supplies the worked example.
+  tips. Grouped GEMM introduces the workflow; recorded Kimi Delta Attention
+  runs supply the diagnostic and review examples.
 
 ```{toctree}
 :caption: Part I, Elements of Agentic GPU Programming
