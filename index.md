@@ -34,11 +34,13 @@ through the [GitHub repository](https://github.com/mlc-ai/agentic-gpu-programmin
 ## How This Book Is Organized
 
 - **Part I, Elements of Agentic GPU Programming.** This part introduces the
-  compiler harness and the agent workflows that compose with it. It opens
-  with an overview, then develops domain-specific program analysis, a
-  knowledge base, and benchmarking and profiling through examples and
-  interactive diagrams. It closes with a short chapter on different kinds
-  of agent workflows and how they compose with the compiler harness.
+  fundamental elements of agentic GPU programming. It begins with an overview
+  of how compiler infrastructure and agent workflows fit together in an
+  iterative kernel-development process. The following chapters develop the
+  core elements—domain-specific program analysis, reusable knowledge,
+  benchmarking, and profiling—through examples and interactive diagrams. The
+  part concludes by comparing different agent workflows and showing how these
+  elements can be composed into effective GPU optimization strategies.
 - **Part II, TIRx Harness Overview.** This part introduces TIRx, one concrete
   instance of a compiler harness and the environment used for the examples in
   the rest of the book. It walks through the TIRx compiler foundation and the
